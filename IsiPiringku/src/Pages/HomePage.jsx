@@ -1,11 +1,18 @@
 import React from 'react';
-
+import Navbar from '../Components/Navbar';
+import Features from '../Pages/Features';
+import Background from '../assets/Desktop - 12.png';
+import Dashboard from '../Pages/Dashboard';
+import HeroSection from './HeroSection';
 const HomePage = () => {
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-64px)] relative z-10">
-      <h1 className="text-center text-2xl md:text-3xl font-semibold text-black">
-        Tulisan apa gitu nanti disini
-      </h1>
+    <div
+      className="min-h-screen font-sans bg-contain bg-no-repeat bg-top bg-green-300"
+      style={{ backgroundImage: `url(${Background})` }}
+    >
+      <Navbar />
+      <HeroSection />
+      <Features />
     </div>
   );
 };
