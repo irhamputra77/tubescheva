@@ -1,7 +1,13 @@
+import React from 'react';
+import BackgroundImage from '../assets/Article.png';
+
 const Card = ({ title }) => {
   return (
-    <div className="w-[360px] h-[220px] bg-transparent rounded-lg border border-white shadow-md flex items-center justify-center">
-      <p className="text-gray-700 text-lg font-medium">{title}</p>
+    <div
+      className="w-[550px] h-[287px] rounded-lg shadow-md bg-cover bg-center flex items-start justify-start p-4"
+      style={{ backgroundImage: `url(${BackgroundImage})` }}
+    >
+      <p className="text-black text-sm font-medium">{title}</p>
     </div>
   );
 };
