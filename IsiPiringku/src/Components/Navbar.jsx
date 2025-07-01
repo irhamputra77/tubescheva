@@ -9,7 +9,16 @@ const Navbar = () => {
       </div>
       <div className="flex gap-20">
         <button className="flex items-center justify-center text-white text-2xl h-10 w-27 rounded-md hover:bg-[#995B00]/40 hover:shadow hover:shadow-white transition">Home</button>
-        <button className="flex items-center justify-center text-white text-2xl h-10 w-27 rounded-md hover:bg-[#995B00]/40 hover:shadow hover:shadow-white transition">Artikel</button>
+        <button 
+        className="flex items-center justify-center text-white text-2xl h-10 w-27 rounded-md hover:bg-[#995B00]/40 hover:shadow hover:shadow-white transition"
+        onClick={() => {
+          const articleSection = document.getElementById('article');
+          if (articleSection) {
+            articleSection.scrollIntoView({ behavior: 'smooth' });
+          }
+        }}
+          >Artikel
+        </button>
       </div>
       <div className="flex gap-7">
         <button className="bg-[#4CAF50]/40 text-[#224F24] text-2xl h-10 w-26 rounded-md font-light hover:shadow hover:shadow-white transition border border-white">Login</button>

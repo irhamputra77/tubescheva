@@ -15,15 +15,13 @@ const articles = [
 
 const Article = () => {
   return (
-    <div className="py-10">
+    <div id="article" className="py-10">
       <h2 className="text-4xl text-[#995B00] font-bold text-center mb-8">Artikel</h2>
 
-      <div className="px-4 sm:px-6 md:px-12 lg:px-20 xl:px-20">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-8 justify-items-center">
+      <div className="flex flex-wrap justify-center px-4">
             {articles.map((title, index) => (
               <Card key={index} title={title} />
             ))}
-          </div>
       </div>
 
       <div className="mt-10 flex justify-center">
