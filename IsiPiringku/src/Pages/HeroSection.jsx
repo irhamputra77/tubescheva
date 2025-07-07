@@ -18,11 +18,11 @@ export default function HeroSection() {
       </div>
 
       {/* Image Section */}
-      <div className="w-full md:w-[60%] flex justify-center  md:justify-end mb-6 md:mb-0 px-2 md:px-4 lg:px-8">
+      <div className="w-full md:w-[60%] flex justify-center mt-8 md:justify-end mb-6 md:mb-0 px-2 md:px-4 lg:px-8">
         <img
           src={MockupImage}
           alt="Mockup"
-          className="w-full max-w-[400px] sm:max-w-[450px] md:max-w-[600px] lg:max-w-[700px] object-contain"
+          className="w-full max-w-[400px] sm:max-w-[500px] md:max-w-[600px] lg:max-w-[700px] object-contain"
         />
       </div>
 
