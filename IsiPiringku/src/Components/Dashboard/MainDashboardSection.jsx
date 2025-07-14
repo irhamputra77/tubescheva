@@ -108,23 +108,18 @@ export default function MainDashboardSection() {
 
     return (
         <div className="w-full max-h-[80vh] bg-[#F5F5F5] pt-14 overflow-hidden ">
-            {/* Batas lebar maksimum, padding responsif */}
             <div className="max-w-screen-2xl mx-auto w-full px-2 sm:px-4 h-auto">
                 <div className="grid grid-cols-1 md:grid-cols-8 grid-rows-8 gap-5 w-full min-h-[4px]">
-                    {/* Kartu Statistik */}
                     <div className="md:col-span-2 row-span-2 bg-white rounded-xl shadow px-7 py-4 flex flex-col">
                         <div className="text-[#388E3C] font-semibold text-xl mb-2">Ibu dengan Bayi</div>
                         <div className="text-[#388E3C] font-bold text-4xl mb-1">1,954</div>
                         <div className="w-full h-[2px] bg-[#eeeeee] my-2"></div>
                         <div className="flex items-center gap-2 mt-2">
-                            {/* ... SVG ... */}
                             <svg width="28" height="28" viewBox="0 0 48 48" fill="#388E3C">
-                                {/* ... Path ... */}
                             </svg>
                             <span className="text-[#388E3C] text-base font-semibold">00% dari bulan lalu</span>
                         </div>
                     </div>
-                    {/* Grafik */}
                     <div className="md:col-span-6 row-span-2 bg-white rounded-xl shadow px-4 py-3 flex items-center min-h-[148px]">
                         <ResponsiveContainer width="100%" height={120}>
                             <AreaChart data={data}>
@@ -150,10 +145,8 @@ export default function MainDashboardSection() {
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>
-                    {/* Tabel */}
                     <div className="col-span-1 md:col-span-8 row-start-3 row-end-8 bg-white rounded-xl shadow px-2 md:px-4 py-2 mt-1">
                         <div className="text-2xl font-bold text-[#252525] mb-4">PENGGUNA BARU</div>
-                        {/* Tambahkan wrapper div dengan max-h dan overflow-auto */}
                         <div className="w-full overflow-auto" style={{ maxHeight: "350px" }}>
                             <table className="w-full text-left border-collapse min-w-[650px]">
                                 <thead>
@@ -183,7 +176,6 @@ export default function MainDashboardSection() {
                                 </tbody>
                             </table>
                         </div>
-                        {/* Pagination tetap di bawah tabel, di luar wrapper scroll */}
                         <Pagination
                             currentPage={currentPage}
                             totalPages={totalPages}

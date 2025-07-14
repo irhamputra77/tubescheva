@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 
-// Komponen Pagination tetap
 function Pagination({ currentPage, totalPages, onPageChange }) {
     const pages = [];
     const maxDisplay = 3;
@@ -72,7 +71,6 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
     );
 }
 
-// Komponen Data Makanan (dengan grid header & isi)
 export default function FoodDataSection() {
     const foods = [
         { nama: "NASI", berat: "90/G", kalori: "200", lemak: "200", protein: "200", karbo: "200" },
@@ -94,7 +92,6 @@ export default function FoodDataSection() {
         <div className="mx-4 my-6">
             <div className="text-xl font-bold mb-3 text-[#222] pl-2">DATA MAKANAN</div>
             <div className="rounded-2xl bg-[#f3f3f3] shadow-inner p-2">
-                {/* Header grid: 8 kolom */}
                 <div className="grid grid-cols-8 bg-[#D7D7D7] text-[#575757] text-sm font-semibold rounded-t-2xl overflow-hidden">
                     <div className="py-3 px-3 rounded-l-xl text-center">NO</div>
                     <div className="py-3 px-3 text-center">NAMA MAKANAN</div>
@@ -105,7 +102,6 @@ export default function FoodDataSection() {
                     <div className="py-3 px-3 text-center">KARBO</div>
                     <div className="py-3 px-3 rounded-r-xl text-center">ACTION</div>
                 </div>
-                {/* Body grid */}
                 <div className="divide-y">
                     {displayedFoods.map((food, i) => (
                         <div key={i} className="grid grid-cols-8 items-center bg-white text-[#222] text-sm">
@@ -122,7 +118,6 @@ export default function FoodDataSection() {
                             </div>
                         </div>
                     ))}
-                    {/* untuk baris kosong */}
                     {Array.from({ length: usersPerPage - displayedFoods.length }).map((_, idx) => (
                         <div key={`empty-${idx}`} className="grid grid-cols-8 bg-white text-[#222] text-sm" style={{ minHeight: '48px' }}>
                             {Array.from({ length: 8 }).map((__, colIdx) => (

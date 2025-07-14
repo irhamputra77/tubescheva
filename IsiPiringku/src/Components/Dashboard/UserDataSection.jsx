@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-// Komponen Pagination tetap sama
+
 function Pagination({ currentPage, totalPages, onPageChange }) {
     const pages = [];
     const maxDisplay = 3;
@@ -72,7 +72,7 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
     );
 }
 
-// UserDataSection dengan grid dan padding baris kosong
+
 export default function UserDataSection() {
     const users = [
         { nama: "ADI SULAIMAN", tgl: "08/10/2012", email: "ADI@GMAIL.COM", jk: "LAKI - LAKI" },
@@ -83,7 +83,6 @@ export default function UserDataSection() {
         { nama: "ADI SULAIMAN", tgl: "08/10/2012", email: "ADI@GMAIL.COM", jk: "LAKI - LAKI" },
         { nama: "ADI SULAIMAN", tgl: "08/10/2012", email: "ADI@GMAIL.COM", jk: "LAKI - LAKI" },
         { nama: "ADI SULAIMAN", tgl: "08/10/2012", email: "ADI@GMAIL.COM", jk: "LAKI - LAKI" },
-        // Coba hapus/kurangi jumlah data di sini, baris kosong otomatis muncul di UI
     ];
     const [currentPage, setCurrentPage] = useState(1);
     const usersPerPage = 8;
@@ -94,14 +93,12 @@ export default function UserDataSection() {
         currentPage * usersPerPage
     );
 
-    // Hitung sisa baris kosong
     const emptyRows = usersPerPage - displayedUsers.length;
 
     return (
         <div className="mx-4 my-6">
             <div className="text-xl font-bold mb-3 text-[#222] pl-2">DATA PENGGUNA</div>
             <div className="rounded-2xl bg-[#f3f3f3] shadow-inner p-2">
-                {/* Header grid */}
                 <div className="grid grid-cols-6 bg-[#D7D7D7] text-[#575757] text-sm font-semibold rounded-t-2xl overflow-hidden">
                     <div className="text-center py-3 px-3 rounded-l-xl">NO</div>
                     <div className="text-center py-3 px-3">NAMA LENGKAP</div>
@@ -110,7 +107,6 @@ export default function UserDataSection() {
                     <div className="text-center py-3 px-3">JENIS KELAMIN</div>
                     <div className="text-center py-3 px-3 rounded-r-xl text-center">ACTION</div>
                 </div>
-                {/* Body grid */}
                 <div className="divide-y">
                     {displayedUsers.map((user, i) => (
                         <div key={i} className="grid grid-cols-6 items-center bg-white text-[#222] text-sm">
@@ -125,7 +121,6 @@ export default function UserDataSection() {
                             </div>
                         </div>
                     ))}
-                    {/* Baris kosong */}
                     {Array.from({ length: emptyRows }).map((_, idx) => (
                         <div key={`empty-${idx}`} className="grid grid-cols-6 items-center bg-white text-[#222] text-sm" style={{ minHeight: '56px' }}>
                             {Array.from({ length: 6 }).map((__, colIdx) => (
