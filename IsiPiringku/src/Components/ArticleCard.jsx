@@ -1,10 +1,11 @@
-// components/ArticleCard.jsx
 import React from "react";
+import { Link } from "react-router-dom";  
 
-const ArticleCard = ({ title, description, image, className = "" }) => {
+const ArticleCard = ({ id, title, description, image, className = "" }) => {
 	return (
-		<div
-			className={`relative rounded-sm overflow-hidden bg-cover bg-center ${className}`}
+		<Link
+			to={`/artikel/${id}`}  
+			className={`relative rounded-sm overflow-hidden bg-cover bg-center block ${className}`}
 			style={{ backgroundImage: `url(${image})` }}
 		>
 			<div className="absolute inset-0 bg-black/30"></div>
@@ -12,7 +13,7 @@ const ArticleCard = ({ title, description, image, className = "" }) => {
 				<h3 className="font-semibold text-lg">{title}</h3>
 				{description && <p className="text-sm mt-1">{description}</p>}
 			</div>
-		</div>
+		</Link>
 	);
 };
 

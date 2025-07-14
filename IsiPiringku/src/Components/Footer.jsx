@@ -1,41 +1,65 @@
 import React from "react";
+import { Icon } from "@iconify/react";
 
 const Footer = () => {
 	return (
-		<footer className="bg-[#1B4D2D] text-white py-10 px-6">
-			<div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-8">
-				<div>
-					<h3 className="font-bold text-lg mb-2">Isi Piringku</h3>
-					<p className="text-sm">
-						Get out there & discover your next slope, mountain &
-						destination!
+		<footer className="bg-[#1B4D2D] text-white py-5 px-4 sm:px-6">
+			<div className="space-y-6">
+				<div className="mb-2">
+					<h3 className="font-bold text-2xl mb-4">Isi Piringku</h3>
+					<p className="text-lg font-semibold">
+						Get out there & discover your next slope, <br />
+						mountain & destination!
 					</p>
 				</div>
-				<div>
-					<h3 className="text-yellow-300 font-semibold mb-2">
-						More on The Blog
-					</h3>
-					<ul className="text-sm space-y-1">
-						<li>About MNTN</li>
-						<li>Contributors & Writers</li>
-						<li>Write For Us</li>
-						<li>Contact Us</li>
-						<li>Privacy Policy</li>
-					</ul>
+				<div className="flex items-center space-x-2 pb-10">
+					<div className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-400">
+						<Icon
+							icon="ri:instagram-fill"
+							width="16"
+							height="16"
+							className="text-white"
+						/>
+					</div>
+					<div className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-400">
+						<Icon
+							icon="mdi:twitter"
+							width="16"
+							height="16"
+							className="text-white"
+						/>
+					</div>
+					<div className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-400">
+						<Icon
+							icon="ri:facebook-fill"
+							width="16"
+							height="16"
+							className="text-white"
+						/>
+					</div>
+					<div className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-400">
+						<Icon
+							icon="ri:threads-fill"
+							width="16"
+							height="16"
+							className="text-white"
+						/>
+					</div>
+					<div className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-400">
+						<Icon
+							icon="ri:instagram-fill"
+							width="16"
+							height="16"
+							className="text-white"
+						/>
+					</div>
 				</div>
-				<div>
-					<h3 className="text-yellow-300 font-semibold mb-2">
-						More on MNTN
-					</h3>
-					<ul className="text-sm space-y-1">
-						<li>The Team</li>
-						<li>Jobs</li>
-						<li>Press</li>
-					</ul>
-				</div>
-			</div>
-			<div className="text-center text-xs mt-6 text-gray-300">
-				Copyright © 2023 MNTN, Inc. Terms & Privacy
+
+				<hr className="border-gray-400 mt-10 mb-3" />
+
+				<p className="text-sm text-gray-300 pt-1">
+					Copyright © 2025 Isi Piringku, Inc. Terms & Privacy
+				</p>
 			</div>
 		</footer>
 	);

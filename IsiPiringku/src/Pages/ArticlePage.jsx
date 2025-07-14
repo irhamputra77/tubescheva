@@ -1,65 +1,60 @@
-import React, { useEffect, useState } from "react";
+// pages/ArticlePage.jsx
+import { useParams } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
+import bgImage from "../assets/bg-articlePage.png"; 
+
+const articles = [
+	{
+		id: 5,
+		title: "Nutrisi, Pengertian dan Jenis-Jenisnya yang Perlu Diketahui",
+		content: `Nutrisi adalah aspek fundamental bagi kesehatan dan perkembangan tubuh..
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+`,
+		image: "/img/nutrisi.jpg",
+	},
+	{
+		id: 6,
+		title: "Kebutuhan Nutrisi Ibu Hamil Terpenuhi, Kehamilan Pasti Lancar",
+		content: `Ibu hamil membutuhkan berbagai nutrisi untuk mendukung kesehatan...`,
+		image: "/img/hamil-lancar.jpg",
+	},
+];
 
 const ArticlePage = () => {
-  const [articles, setArticles] = useState([]);
-  const [loading, setLoading] = useState(true);
+	const { id } = useParams();
+	const article = articles.find((a) => a.id === parseInt(id));
 
-  // Simulasi fetching (nanti bisa ganti dengan API asli)
-  useEffect(() => {
-    const fetchArticles = async () => {
-      try {
-        const fakeData = [
-          {
-            id: 1,
-            title: "Apa Itu Nutrisi?",
-            summary: "Nutrisi adalah komponen penting untuk pertumbuhan dan kesehatan tubuh.",
-          },
-          {
-            id: 2,
-            title: "5 Jenis Nutrisi yang Wajib Diketahui",
-            summary: "Mengenal karbohidrat, protein, lemak, vitamin, dan mineral.",
-          },
-          {
-            id: 2,
-            title: "5 Jenis Nutrisi yang Wajib Diketahui",
-            summary: "Mengenal karbohidrat, protein, lemak, vitamin, dan mineral.",
-          },
-        ];
+	if (!article) {
+		return <div className="text-center mt-10">Artikel tidak ditemukan</div>;
+	}
 
-        // simulasi delay
-        setTimeout(() => {
-          setArticles(fakeData);
-          setLoading(false);
-        }, 1000);
-      } catch (error) {
-        console.error("Gagal fetch artikel:", error);
-        setLoading(false);
-      }
-    };
-
-    fetchArticles();
-  }, []);
-
-  return (
-    <MainLayout>
-      <div className="max-w-3xl mx-auto p-6">
-        <h1 className="text-3xl font-bold mb-6 text-center">Artikel Gizi</h1>
-        {loading ? (
-          <p>Loading artikel...</p>
-        ) : (
-          <div className="space-y-6">
-            {articles.map((article) => (
-              <div key={article.id} className="bg-white p-4 rounded-xl shadow">
-                <h2 className="text-xl font-semibold mb-2">{article.title}</h2>
-                <p className="text-gray-700">{article.summary}</p>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </MainLayout>
-  );
+	return (
+         <div
+      style={{ backgroundImage: `url(${bgImage})` }} //
+      className="bg-cover bg-repeat bg-center min-h-screen"
+    >
+		<MainLayout>
+				<h1 className="text-2xl font-bold mb-5 mt-10">{article.title}</h1>
+				<img
+					src={article.image}
+					alt={article.title}
+					className="rounded-xl mb-4"
+				/>
+				<p className="text-gray-800 whitespace-pre-line leading-relaxed mb-10">
+					{article.content}
+				</p>
+		</MainLayout>
+        </div>
+	);
 };
 
 export default ArticlePage;
