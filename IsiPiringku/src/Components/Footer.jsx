@@ -8,8 +8,8 @@ const Footer = () => {
 				<div className="mb-2">
 					<h3 className="font-bold text-2xl mb-4">Isi Piringku</h3>
 					<p className="text-lg font-semibold">
-						Get out there & discover your next slope, <br />
-						mountain & destination!
+						Teman Setia Gizi Keluarga Anda <br />
+						Bantu ibu dan anak mendapatkan nutrisi terbaik setiap hari dengan panduan gizi yang praktis dan terpercaya.
 					</p>
 				</div>
 				<div className="flex items-center space-x-2 pb-10">
