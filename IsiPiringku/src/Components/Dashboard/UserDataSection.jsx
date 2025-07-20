@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
+import { useNavigate } from "react-router-dom";
+
 
 function Pagination({ currentPage, totalPages, onPageChange }) {
 	const pages = [];
@@ -43,11 +45,10 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
 				<button
 					key={page}
 					onClick={() => onPageChange(page)}
-					className={`w-8 h-8 rounded flex items-center justify-center font-bold ${
-						page === currentPage
-							? "bg-[#388e3c] text-white"
-							: "bg-white border text-[#388e3c]"
-					}`}
+					className={`w-8 h-8 rounded flex items-center justify-center font-bold ${page === currentPage
+						? "bg-[#388e3c] text-white"
+						: "bg-white border text-[#388e3c]"
+						}`}
 				>
 					{page}
 				</button>
@@ -79,6 +80,7 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
 }
 
 export default function UserDataSection() {
+	const navigate = useNavigate();
 	const [selectedMenu, setSelectedMenu] = useState("data_pengguna");
 	const [open, setOpen] = useState(false);
 
@@ -88,11 +90,18 @@ export default function UserDataSection() {
 		{ label: "Data Artikel", value: "data_artikel", icon: "material-symbols:article" },
 	];
 
+	useEffect(() => {
+		if (location.pathname === "/dashboard/users") setSelectedMenu("data_pengguna");
+		else if (location.pathname === "/dashboard/anak") setSelectedMenu("data_anak");
+		else if (location.pathname === "/dashboard/artikel") setSelectedMenu("data_artikel");
+	}, [location.pathname]);
+
 	const handleSelect = (value) => {
 		setSelectedMenu(value);
 		setOpen(false);
-		if (value === "data_anak") alert("Navigasi ke Data Anak");
-		if (value === "data_artikel") alert("Navigasi ke Data Artikel");
+		if (value === "data_pengguna") navigate("/dashboard/users");
+		if (value === "data_anak") navigate("/dashboard/anak");
+		if (value === "data_artikel") navigate("/dashboard/artikel");
 	};
 
 	const users = Array(8).fill({
@@ -140,9 +149,8 @@ export default function UserDataSection() {
 							<Icon
 								icon="mdi:chevron-down"
 								width="20"
-								className={`transition-transform duration-200 ${
-									open ? "rotate-180" : ""
-								}`}
+								className={`transition-transform duration-200 ${open ? "rotate-180" : ""
+									}`}
 							/>
 						</button>
 

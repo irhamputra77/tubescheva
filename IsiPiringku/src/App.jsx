@@ -1,17 +1,27 @@
+import React from "react";
+import "./index.css";
+import MainDashboardSection from './Components/Dashboard/MainDashboardSection';
+import HomePage from "./Pages/HomePage";
 import { Routes, Route } from "react-router-dom";
-import UserDataSection from "../Components/Dashboard/UserDataSection";
-import DataAnakSection from "../Components/Dashboard/DataAnakSection";
-import ArtikelSection from "../Components/Dashboard/ArtikelSection";
+import DashboardLayouts from './layouts/DashboardLayouts';
+import ArticlePage from "./Pages/ArticlePage";
+import UserDataSection from "./Components/Dashboard/UserDataSection";
+import ArtikelSection from "./Components/Dashboard/ArtikelSection";
+import DataAnakSection from "./Components/Dashboard/DataAnakSection";
+import FoodDataSection from './Components/Dashboard/FoodDataSection';
 
-export default function Dashboard() {
+export default function App() {
 	return (
-		<div className="p-4">
-			{/* Tambahkan layout dashboard di sini (jika ada navbar/sidebar) */}
-			<Routes>
-				<Route path="/" element={<UserDataSection />} />
-				<Route path="data-anak" element={<DataAnakSection />} />
-				<Route path="data-artikel" element={<ArtikelSection />} />
-			</Routes>
-		</div>
+		<Routes>
+			<Route path="/" element={<HomePage />} />
+			<Route path="/artikel/:id" element={<ArticlePage />} />
+			<Route path="/dashboard" element={<DashboardLayouts />}>
+				<Route index element={<MainDashboardSection />} />
+				<Route path="users" element={<UserDataSection />} />
+				<Route path="foods" element={<FoodDataSection />} />
+				<Route path="artikel" element={<ArtikelSection />} />
+				<Route path="anak" element={<DataAnakSection />} />
+			</Route>
+		</Routes>
 	);
 }
