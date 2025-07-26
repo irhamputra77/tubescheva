@@ -24,7 +24,7 @@ const Navbar = () => {
 				<button
 					onClick={() => handleScroll("hero")}
 					className="flex items-center justify-center 
-					text-white text-base sm:text-sm md:text-2xl 
+					text-[#39833C] text-base sm:text-sm md:text-2xl 
                		h-8 sm:h-10 md:h-10 w-20 sm:w-28 md:w-30 
 					rounded-md bg-[#4CAF50]/40 hover:bg-[#66BB66] hover:shadow hover:shadow-white transition "
 				>

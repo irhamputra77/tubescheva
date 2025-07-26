@@ -26,7 +26,7 @@ export default function HeroSection() {
 						ibu dengan panduan gizi yang praktis, terpercaya, dan
 						menyenangkan
 					</p>
-					<button className="bg-[#4CAF50]/40 text-black font-bold py-2 px-7 rounded-md transition hover:bg-[#66BB66] ml-[-1rem]">
+					<button className="bg-[#4CAF50]/40 text-[##224F24] font-bold py-2 px-7 rounded-md transition hover:bg-[#66BB66] ml-[-1rem]">
 						Download
 					</button>
 				</div>
