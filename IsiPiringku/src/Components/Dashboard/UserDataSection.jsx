@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Icon } from "@iconify/react";
 import { useNavigate } from "react-router-dom";
-
 
 function Pagination({ currentPage, totalPages, onPageChange }) {
 	const pages = [];
@@ -81,35 +80,12 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
 
 export default function UserDataSection() {
 	const navigate = useNavigate();
-	const [selectedMenu, setSelectedMenu] = useState("data_pengguna");
-	const [open, setOpen] = useState(false);
 
-	const menuOptions = [
-		{ label: "Data Pengguna", value: "data_pengguna", icon: "bi:people-fill" },
-		{ label: "Data Anak", value: "data_anak", icon: "mdi:teddy-bear" },
-		{ label: "Data Artikel", value: "data_artikel", icon: "material-symbols:article" },
+
+	const users = [
+		{ id: 1, nama: "ADI SULAIMAN", tgl: "08/10/2012", email: "ADI@GMAIL.COM", jk: "LAKI - LAKI" },
+		{ id: 2, nama: "BUDI MULYANA", tgl: "10/12/2010", email: "BUDI@GMAIL.COM", jk: "LAKI - LAKI" },
 	];
-
-	useEffect(() => {
-		if (location.pathname === "/dashboard/users") setSelectedMenu("data_pengguna");
-		else if (location.pathname === "/dashboard/anak") setSelectedMenu("data_anak");
-		else if (location.pathname === "/dashboard/artikel") setSelectedMenu("data_artikel");
-	}, [location.pathname]);
-
-	const handleSelect = (value) => {
-		setSelectedMenu(value);
-		setOpen(false);
-		if (value === "data_pengguna") navigate("/dashboard/users");
-		if (value === "data_anak") navigate("/dashboard/anak");
-		if (value === "data_artikel") navigate("/dashboard/artikel");
-	};
-
-	const users = Array(8).fill({
-		nama: "ADI SULAIMAN",
-		tgl: "08/10/2012",
-		email: "ADI@GMAIL.COM",
-		jk: "LAKI - LAKI",
-	});
 
 	const [currentPage, setCurrentPage] = useState(1);
 	const usersPerPage = 8;
@@ -122,58 +98,13 @@ export default function UserDataSection() {
 
 	const emptyRows = usersPerPage - displayedUsers.length;
 
+	const handleRowClick = (user) => {
+		navigate('/userdetails', { state: user });
+	};
 	return (
 		<div className="mx-4 my-6">
 			<div className="flex justify-between items-center mb-3 px-2">
 				<div className="text-xl font-bold text-[#222]">DATA PENGGUNA</div>
-
-				{/* Dropdown */}
-				<div className="flex items-center gap-2">
-					<div className="relative">
-						<button
-							onClick={() => setOpen(!open)}
-							className="flex items-center justify-between gap-2 pl-2 pr-3 py-1.5 text-lg font-semibold text-[#2E7D32] bg-[#E1EFE3] border border-gray-300 rounded-xl w-64"
-						>
-							<div className="flex items-center gap-2">
-								<Icon
-									icon={
-										menuOptions.find((opt) => opt.value === selectedMenu).icon
-									}
-									width="20"
-									color="#204225"
-								/>
-								<span className="text-base">
-									{menuOptions.find((opt) => opt.value === selectedMenu).label}
-								</span>
-							</div>
-							<Icon
-								icon="mdi:chevron-down"
-								width="20"
-								className={`transition-transform duration-200 ${open ? "rotate-180" : ""
-									}`}
-							/>
-						</button>
-
-						{open && (
-							<ul className="absolute z-10 w-64 mt-1 bg-white border rounded shadow">
-								{menuOptions.map((opt) => (
-									<li
-										key={opt.value}
-										onClick={() => handleSelect(opt.value)}
-										className="flex items-center gap-2 px-4 py-2 text-base hover:bg-[#E1EFE3] cursor-pointer"
-									>
-										<Icon icon={opt.icon} width="18" />
-										{opt.label}
-									</li>
-								))}
-							</ul>
-						)}
-					</div>
-
-					<button className="w-12 h-12 bg-[#4CAF50]/20 text-[#39833C] text-5xl leading-none rounded-full font-medium flex items-center justify-center ml-2">
-						<span className="relative -top-[4px]">+</span>
-					</button>
-				</div>
 			</div>
 
 			<div className="rounded-2xl bg-[#f3f3f3] shadow-inner p-2">
@@ -188,8 +119,9 @@ export default function UserDataSection() {
 				<div className="divide-y">
 					{displayedUsers.map((user, i) => (
 						<div
-							key={i}
-							className="grid grid-cols-6 items-center bg-white text-[#222] text-sm"
+							key={user.id}
+							className="grid grid-cols-6 items-center bg-white text-[#222] text-sm hover:bg-[#C8E6C9] cursor-pointer transition"
+							onClick={() => handleRowClick(user)}
 						>
 							<div className="py-5 px-3 text-center">
 								{(currentPage - 1) * usersPerPage + i + 1}
@@ -199,10 +131,16 @@ export default function UserDataSection() {
 							<div className="py-5 px-3 text-center">{user.email}</div>
 							<div className="py-5 px-3 text-center">{user.jk}</div>
 							<div className="py-5 px-3 flex gap-2 justify-center">
-								<button className="bg-[#E8C097] text-[#6B3B0A] rounded-md px-4 py-1 font-bold text-xs">
+								<button
+									className="bg-[#E8C097] text-[#6B3B0A] rounded-md px-4 py-1 font-bold text-xs"
+									onClick={e => { e.stopPropagation(); /* buka modal edit */ }}
+								>
 									EDIT
 								</button>
-								<button className="bg-[#A83A3A] text-white rounded-md px-4 py-1 font-bold text-xs">
+								<button
+									className="bg-[#A83A3A] text-white rounded-md px-4 py-1 font-bold text-xs"
+									onClick={e => { e.stopPropagation(); /* buka konfirmasi hapus */ }}
+								>
 									HAPUS
 								</button>
 							</div>

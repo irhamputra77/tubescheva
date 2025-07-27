@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import { useNavigate, useLocation } from "react-router-dom";
+import DeleteConfirmationModal from "../Components/Common/DeleteConfirmationModal";
 
-// Pagination Component
 function Pagination({ currentPage, totalPages, onPageChange }) {
     const pages = [];
     const maxDisplay = 3;
@@ -79,23 +79,19 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
     );
 }
 
-// Main Section Component
 export default function DataAnakSection() {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Aktifkan menu sesuai route saat halaman berubah
     const [selectedMenu, setSelectedMenu] = useState("data_pengguna");
     useEffect(() => {
-        if (location.pathname === "/dashboard/users") setSelectedMenu("data_pengguna");
-        else if (location.pathname === "/dashboard/anak") setSelectedMenu("data_anak");
-        else if (location.pathname === "/dashboard/artikel") setSelectedMenu("data_artikel");
+        if (location.pathname === "/userdetails") setSelectedMenu("data_anak");
+        else if (location.pathname === "/userdetails/artikel") setSelectedMenu("data_artikel");
     }, [location.pathname]);
 
     const [open, setOpen] = useState(false);
 
     const menuOptions = [
-        { label: "Data Pengguna", value: "data_pengguna", icon: "bi:people-fill" },
         { label: "Data Anak", value: "data_anak", icon: "mdi:teddy-bear" },
         { label: "Data Artikel", value: "data_artikel", icon: "material-symbols:article" },
     ];
@@ -103,12 +99,13 @@ export default function DataAnakSection() {
     const handleSelect = (value) => {
         setSelectedMenu(value);
         setOpen(false);
-        if (value === "data_pengguna") navigate("/dashboard/users");
-        if (value === "data_anak") navigate("/dashboard/anak");
-        if (value === "data_artikel") navigate("/dashboard/artikel");
+        if (value === "data_anak") navigate("/userdetails");
+        if (value === "data_artikel") navigate("/userdetails/artikel");
     };
 
-    // Data artikel, bisa diganti sesuai kebutuhan
+    // AMAN: Gunakan variable ini!
+    const selectedMenuObj = menuOptions.find(opt => opt.value === selectedMenu);
+
     const rows = [
         {
             judul: "Nutrisi, Pengertian dan jenis - jenisnya yang perlu diketahui",
@@ -174,8 +171,11 @@ export default function DataAnakSection() {
     return (
         <div className="mx-4 my-6">
             {/* Header Dropdown */}
+            <button className="bg-[#4CAF50]/20 px-3 pr-50 py-2 rounded-xl text-[#2E7D32] font-semibold mb-3" onClick={() => { navigate("/dashboard") }}>{"< Dashboard"}</button>
             <div className="flex justify-between items-center mb-3 px-2">
-                <div className="text-xl font-bold text-[#222]">DATA ARTIKEL</div>
+                <div className="flex flex-col items-start">
+                    <div className="text-xl font-semibold text-[#222] text-[30px]">ADI SULAIMAN</div>
+                </div>
                 <div className="flex items-center gap-2">
                     <div className="relative">
                         <button
@@ -184,14 +184,12 @@ export default function DataAnakSection() {
                         >
                             <div className="flex items-center gap-2">
                                 <Icon
-                                    icon={
-                                        menuOptions.find((opt) => opt.value === selectedMenu).icon
-                                    }
+                                    icon={selectedMenuObj?.icon || "mdi:help-circle-outline"}
                                     width="20"
                                     color="#204225"
                                 />
                                 <span className="text-base">
-                                    {menuOptions.find((opt) => opt.value === selectedMenu).label}
+                                    {selectedMenuObj?.label || "Pilih Menu"}
                                 </span>
                             </div>
                             <Icon

@@ -15,6 +15,7 @@ import UserDataSection from "./Components/Dashboard/UserDataSection";
 import ArtikelSection from "./Components/Dashboard/ArtikelSection";
 import DataAnakSection from "./Components/Dashboard/DataAnakSection";
 import FoodDataSection from "./Components/Dashboard/FoodDataSection";
+import UserDetailsDashboard from "./layouts/DetailUserLayouts";
 
 export default function App() {
 	return (
@@ -28,8 +29,10 @@ export default function App() {
 				<Route index element={<MainDashboardSection />} />
 				<Route path="users" element={<UserDataSection />} />
 				<Route path="foods" element={<FoodDataSection />} />
+			</Route>
+			<Route path="/userDetails" element={<UserDetailsDashboard />}>
+				<Route index element={<DataAnakSection />} />
 				<Route path="artikel" element={<ArtikelSection />} />
-				<Route path="anak" element={<DataAnakSection />} />
 			</Route>
 		</Routes>
 	);

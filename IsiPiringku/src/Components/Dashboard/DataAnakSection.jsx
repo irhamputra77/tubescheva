@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
-
+// Komponen Pagination
 function Pagination({ currentPage, totalPages, onPageChange }) {
     const pages = [];
     const maxDisplay = 3;
@@ -81,43 +81,37 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
 
 export default function DataAnakSection() {
     const navigate = useNavigate();
-    const [selectedMenu, setSelectedMenu] = useState("data_pengguna");
+    const location = useLocation();
+    const [selectedMenu, setSelectedMenu] = useState("data_anak");
     const [open, setOpen] = useState(false);
 
-    const menuOptions = [
-        { label: "Data Pengguna", value: "data_pengguna", icon: "bi:people-fill" },
-        { label: "Data Anak", value: "data_anak", icon: "mdi:teddy-bear" },
-        { label: "Data Artikel", value: "data_artikel", icon: "material-symbols:article" },
-    ];
+    // Data hasil klik dari UserDataSection via state navigation
+    const userData = location.state;
 
-    useEffect(() => {
-        if (location.pathname === "/dashboard/users") setSelectedMenu("data_pengguna");
-        else if (location.pathname === "/dashboard/anak") setSelectedMenu("data_anak");
-        else if (location.pathname === "/dashboard/artikel") setSelectedMenu("data_artikel");
-    }, [location.pathname]);
-
-    const handleSelect = (value) => {
-        setSelectedMenu(value);
-        setOpen(false);
-        if (value === "data_pengguna") navigate("/dashboard/users");
-        if (value === "data_anak") navigate("/dashboard/anak");
-        if (value === "data_artikel") navigate("/dashboard/artikel");
-    };
-
-    const users = [
-        {
-            nama: "DODIT SULAIMAN",
-            tgl: "08/10/2029",
-            gender: "LAKI-LAKI",
-            kelahiran: "NORMAL"
-        },
-        {
-            nama: "SITI SULAIMAN",
-            tgl: "08/10/2029",
-            gender: "PEREMPUAN",
-            kelahiran: "NORMAL"
-        }
-    ]
+    // Definisikan data users sesuai data navigation atau default
+    const users = userData
+        ? [
+            {
+                nama: userData.nama,
+                tgl: userData.tgl,
+                gender: userData.jk || userData.gender || "-",
+                kelahiran: userData.kelahiran || "-",
+            },
+        ]
+        : [
+            {
+                nama: "DODIT SULAIMAN",
+                tgl: "08/10/2029",
+                gender: "LAKI-LAKI",
+                kelahiran: "NORMAL",
+            },
+            {
+                nama: "SITI SULAIMAN",
+                tgl: "08/10/2029",
+                gender: "PEREMPUAN",
+                kelahiran: "NORMAL",
+            },
+        ];
 
     const [currentPage, setCurrentPage] = useState(1);
     const usersPerPage = 8;
@@ -127,14 +121,30 @@ export default function DataAnakSection() {
         (currentPage - 1) * usersPerPage,
         currentPage * usersPerPage
     );
-
     const emptyRows = usersPerPage - displayedUsers.length;
+
+    const menuOptions = [
+        { label: "Data Anak", value: "data_anak", icon: "mdi:teddy-bear" },
+        { label: "Data Artikel", value: "data_artikel", icon: "material-symbols:article" },
+    ];
+
+    useEffect(() => {
+        if (location.pathname === "/userdetails") setSelectedMenu("data_anak");
+        else if (location.pathname === "/userdetails/artikel") setSelectedMenu("data_artikel");
+    }, [location.pathname]);
+
+    const handleSelect = (value) => {
+        setSelectedMenu(value);
+        setOpen(false);
+        if (value === "data_anak") navigate("/userdetails");
+        if (value === "data_artikel") navigate("/userdetails/artikel");
+    };
 
     return (
         <div className="mx-4 my-6">
+            <button className="bg-[#4CAF50]/20 px-3 pr-50 py-2 rounded-xl text-[#2E7D32] font-semibold mb-3" onClick={() => { navigate("/dashboard") }}>{"< Dashboard"}</button>
             <div className="flex justify-between items-center mb-3 px-2">
-                <div className="text-xl font-bold text-[#222]">DATA PENGGUNA</div>
-
+                <div className="text-xl font-bold text-[#222]">DATA ANAK</div>
                 {/* Dropdown */}
                 <div className="flex items-center gap-2">
                     <div className="relative">
@@ -161,7 +171,6 @@ export default function DataAnakSection() {
                                     }`}
                             />
                         </button>
-
                         {open && (
                             <ul className="absolute z-10 w-64 mt-1 bg-white border rounded shadow">
                                 {menuOptions.map((opt) => (
@@ -177,7 +186,6 @@ export default function DataAnakSection() {
                             </ul>
                         )}
                     </div>
-
                     <button className="w-12 h-12 bg-[#4CAF50]/20 text-[#39833C] text-5xl leading-none rounded-full font-medium flex items-center justify-center ml-2">
                         <span className="relative -top-[4px]">+</span>
                     </button>
@@ -231,7 +239,6 @@ export default function DataAnakSection() {
                     ))}
                 </div>
             </div>
-
             <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}
