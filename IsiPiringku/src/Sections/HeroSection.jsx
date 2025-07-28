@@ -18,7 +18,7 @@ export default function HeroSection() {
 			>
 				{/* Text Section */}
 				<div className="text-center md:text-left max-w-xl space-y-5">
-					<h1 className="text-[30px] ml-[-1rem] md:text-[40px] lg:text-[55px] font-bold text-[#995B00] leading-[2rem] sm:leading-[2.5rem] md:leading-[3rem] lg:leading-[3.5rem]"  >
+					<h1 className="text-[30px] ml-[-1rem] md:text-[40px] lg:text-[55px] font-bold text-[#995B00] leading-[2rem] sm:leading-[2.5rem] md:leading-[3rem] lg:leading-[3.5rem]" >
 						Sehat dimulai <br /> dari piring anda
 					</h1>
 					<p className="text-black ml-[-1rem] md:text-[18px] text-xl font-semibold" >
