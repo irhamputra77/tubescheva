@@ -3,8 +3,6 @@ import { Icon } from "@iconify/react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 
-82b777ff66c78722ef7e3fee0f1d85b962de9e6e
-
 function Pagination({ currentPage, totalPages, onPageChange }) {
     const pages = [];
     const maxDisplay = 3;
