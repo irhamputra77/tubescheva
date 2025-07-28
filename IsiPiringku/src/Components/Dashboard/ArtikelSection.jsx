@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import { useNavigate, useLocation } from "react-router-dom";
-import DeleteConfirmationModal from "../Components/Common/DeleteConfirmationModal";
+import DeleteConfirmationModal from "../common/DeleteConfirmationModal";
 
 function Pagination({ currentPage, totalPages, onPageChange }) {
     const pages = [];

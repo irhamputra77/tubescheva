@@ -144,7 +144,7 @@ export default function DataAnakSection() {
         <div className="mx-4 my-6">
             <button className="bg-[#4CAF50]/20 px-3 pr-50 py-2 rounded-xl text-[#2E7D32] font-semibold mb-3" onClick={() => { navigate("/dashboard") }}>{"< Dashboard"}</button>
             <div className="flex justify-between items-center mb-3 px-2">
-                <div className="text-xl font-bold text-[#222]">DATA ANAK</div>
+                <div className="text-xl font-bold text-[#222]" >DATA ANAK</div>
                 {/* Dropdown */}
                 <div className="flex items-center gap-2">
                     <div className="relative">
