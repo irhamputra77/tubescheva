@@ -21,7 +21,7 @@ export default function HeroSection() {
 					<h1 className="text-[30px] ml-[-1rem] md:text-[40px] lg:text-[55px] font-bold text-[#995B00] leading-[2rem] sm:leading-[2.5rem] md:leading-[3rem] lg:leading-[3.5rem]" >
 						Sehat dimulai <br /> dari piring anda
 					</h1>
-					<p className="text-black ml-[-1rem] md:text-[18px] text-xl font-semibold" >
+					<p className="text-black ml-[-1rem] md:text-[18px] text-xl font-semibold">
 						Dukung pertumbuhan optimal si kecil dan <br /> kesehatan
 						ibu dengan panduan gizi yang praktis, terpercaya, dan
 						menyenangkan
