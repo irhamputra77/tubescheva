@@ -41,16 +41,16 @@ const LoginPage = () => {
 			className="bg-contain bg-center min-h-screen flex items-center justify-center"
 			style={{ backgroundImage: `url(${bgImage})` }}
 		>
-			<div className="w-full flex flex-col lg:flex-row justify-center items-stretch px-4 lg:px-80 min-h-screen">
+			<div className="w-full flex flex-col lg:flex-row justify-center items-stretch px-4 lg:px-32 xl:px-80 min-h-screen">
 				{/* Kiri */}
 				<div className="w-full lg:w-1/2 hidden lg:flex flex-col justify-center text-[#39833C] text-left pr-2 mb-30">
-					<img src={logo} alt="Logo" className="w-80 " />
-					<div className="max-w-md pl-10 mt-[-20px]">
+					<img src={logo} alt="Logo" className="lg:w-64 xl:w-80 w-80" />
+					<div className="max-w-md pl-6 xl:pl-10 mt-[-20px]"> {/* ✅ UPDATED padding kiri */}
 						<h2 className="text-3xl font-semibold leading-tight mb-4">
 							Gizi seimbang dimulai <br />
 							dari piring hari ini
 						</h2>
-						<p className="text-base leading-relaxed">
+						<p className="lg:text-sm xl:text-md leading-relaxed">
 							Isi Piringku hadir untuk membantu keluarga Indonesia memahami
 							pentingnya gizi seimbang demi tumbuh kembang anak yang optimal
 							dan ibu yang sehat.
@@ -60,8 +60,8 @@ const LoginPage = () => {
 
 				{/* Kanan */}
 				<div className="w-full lg:w-1/2 flex justify-center items-start">
-					  <div className="flex flex-col w-full max-w-md  lg:h-screen lg:pt-24">
-						<div className="bg-[#F5F5F5] shadow-2xl rounded-2xl lg:rounded-t-2xl lg:rounded-b-none w-full flex flex-col flex-grow px-10 pt-10 pb-6">
+					<div className="flex flex-col w-full max-w-md lg:min-h-screen lg:pt-24"> {/* ✅ UPDATED height */}
+						<div className="bg-[#F5F5F5] shadow-2xl rounded-2xl xl:rounded-t-2xl xl:rounded-b-none w-full flex flex-col flex-grow px-10 pt-10 pb-6">
 							{/* FORM */}
 							<div className="flex-shrink-0">
 								<div className="text-left mb-6">
