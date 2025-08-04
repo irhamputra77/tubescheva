@@ -87,9 +87,7 @@ return (
                                     placeholder=" "
                                     className="peer w-full px-4 pt-6 pb-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black"
                                     value={fullname}
-                                    onChange={(e) =>
-                                        setFullname(e.target.value)
-                                    }
+                                    onChange={(e) => setFullname(e.target.value)}
                                 />
                                 <label
                                     htmlFor="name"
@@ -108,9 +106,7 @@ return (
                                     placeholder=" "
                                     className="peer w-full px-4 pt-6 pb-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black"
                                     value={email}
-                                    onChange={(e) =>
-                                        setEmail(e.target.value)
-                                    }
+                                    onChange={(e) =>setEmail(e.target.value)}
                                 />
                                 <label
                                     htmlFor="email"
@@ -137,9 +133,7 @@ return (
                                     placeholder=" "
                                     className="peer w-full px-4 pt-6 pb-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black"
                                     value={newPassword}
-                                    onChange={(e) =>
-                                        setNewPassword(e.target.value)
-                                    }
+                                    onChange={(e) =>setNewPassword(e.target.value)}
                                 />
                                 <label
                                     htmlFor="newPassword"
@@ -150,17 +144,11 @@ return (
                                     New Password
                                 </label>
                                 <Icon
-                                    icon={
-                                        showPassword
-                                            ? "mdi:eye-off-outline"
-                                            : "mdi:eye-outline"
-                                    }
+                                    icon={showPassword? "mdi:eye-off-outline": "mdi:eye-outline"}
                                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 cursor-pointer"
                                     width={20}
                                     height={20}
-                                    onClick={() =>
-                                        setShowPassword(!showPassword)
-                                    }
+                                    onClick={() =>setShowPassword(!showPassword)}
                                 />
                             </div>
 
@@ -171,11 +159,7 @@ return (
                                     placeholder=" "
                                     className="peer w-full px-4 pt-6 pb-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black"
                                     value={confirmNewPassword}
-                                    onChange={(e) =>
-                                        setConfirmNewPassword(
-                                            e.target.value
-                                        )
-                                    }
+                                    onChange={(e) =>setConfirmNewPassword(e.target.value)}
                                 />
                                 <label
                                     htmlFor="confirmPassword"
@@ -191,9 +175,7 @@ return (
                                 <select
                                     id="gender"
                                     value={gender}
-                                    onChange={(e) =>
-                                        setGender(e.target.value)
-                                    }
+                                    onChange={(e) =>setGender(e.target.value)}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black bg-white text-gray-700"
                                 >
                                     <option value="">Select Gender</option>
@@ -208,9 +190,7 @@ return (
                                     id="birthDate"
                                     className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black"
                                     value={birthDate}
-                                    onChange={(e) =>
-                                        setBirthDate(e.target.value)
-                                    }
+                                    onChange={(e) =>setBirthDate(e.target.value)}
                                 />
                             </div>
 
