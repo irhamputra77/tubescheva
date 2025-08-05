@@ -166,7 +166,7 @@ return (
 								{/* Submit Button */}
 								<button
 									type="submit"
-									className={`w-full font-semibold py-2 rounded-md transition duration-200 ${
+									className={`w-full font-semibold py-2 mb-20 rounded-md transition duration-200 ${
 										email && password
 											? "bg-[#4CAF50] text-white active:scale-[0.98]"
 											: "bg-[#C8E6C9] text-white cursor-not-allowed"
@@ -176,40 +176,6 @@ return (
 									CONTINUE
 								</button>
 							</form>
-
-							{/* FOOTER */}
-							<div className="mt-6 space-y-2 pb-4">
-								<div className="flex items-center gap-4">
-									<div className="flex-grow h-px bg-black/30"></div>
-									<span className="text-black font-bold text-sm">
-										Or
-									</span>
-									<div className="flex-grow h-px bg-black/30"></div>
-								</div>
-								<button className="flex items-center justify-center w-full border border-gray-300 py-2 rounded-md hover:bg-gray-100 text-sm font-medium">
-									<Icon
-										icon="flat-color-icons:google"
-										className="w-5 h-5 mr-2"
-									/>
-									Log in with Google
-								</button>
-								<button className="flex items-center justify-center w-full border border-gray-300 py-2 rounded-md hover:bg-gray-100 text-sm font-medium">
-									<Icon
-										icon="logos:facebook"
-										className="w-5 h-5 mr-2"
-									/>
-									Log in with Facebook
-								</button>
-								<p className="text-sm text-center mt-4">
-									New User?{" "}
-									<Link
-										to="/register"
-										className="text-black font-semibold hover:underline"
-									>
-										SIGN UP HERE
-									</Link>
-								</p>
-							</div>
 						</div>
 						<div className="flex-grow"></div>
 					</div>
