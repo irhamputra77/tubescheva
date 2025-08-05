@@ -176,7 +176,7 @@ return (
                                     id="gender"
                                     value={gender}
                                     onChange={(e) =>setGender(e.target.value)}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black bg-white text-gray-700"
+                                    className="peer w-full px-4 py-4 text-md bg-[#F5F5F5] text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black"
                                 >
                                     <option value="">Select Gender</option>
                                     <option value="f">Female</option>
