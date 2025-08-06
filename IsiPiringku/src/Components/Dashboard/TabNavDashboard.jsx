@@ -5,30 +5,17 @@ export default function TabNavDashboard() {
     const location = useLocation();
     const navigate = useNavigate();
 
-    let activeTab = "dashboard";
+    let activeTab = "users";
     const path = location.pathname;
 
-    if (path === "/dashboard") activeTab = "dashboard";
-    // Semua path berikut dianggap tab 'users' (pengguna)
-    else if (
-        path.startsWith("/dashboard/users") ||
-        path.startsWith("/dashboard/artikel") ||
-        path.startsWith("/dashboard/anak")
-    ) {
-        activeTab = "users";
-    }
+ if (path.startsWith("/dashboard/users")) activeTab = "users";
     else if (path.startsWith("/dashboard/foods")) activeTab = "foods";
+    else if (path.startsWith("/dashboard/role")) activeTab = "role"; 
+    else if (path.startsWith("/dashboard/kategori")) activeTab = "kategori"; 
 
     return (
         <div className="flex mt-2 h-12">
             <div className="flex rounded-full border border-[#4CAF50] bg-green-50 overflow-hidden">
-                <button
-                    className={`flex items-center text-2xl px-7 py-3 rounded-full transition-all duration-200 focus:outline-none ${activeTab === 'dashboard' ? 'bg-[#C8E6C9] text-[#39833C]' : 'bg-green-50 text-[#39833C]'}`}
-                    onClick={() => navigate('/dashboard')}
-                >
-                    <Icon icon="bi:bar-chart-fill" width="32" height="32" className="mr-2" color="#204225" />
-                    Dashboard
-                </button>
                 <button
                     className={`flex items-center text-2xl px-7 py-3 transition-all rounded-full duration-200 focus:outline-none ${activeTab === 'users' ? 'bg-[#C8E6C9] text-[#39833C]' : 'bg-green-50 text-[#39833C]'}`}
                     onClick={() => navigate('/dashboard/users')}
@@ -42,6 +29,20 @@ export default function TabNavDashboard() {
                 >
                     <Icon icon="mdi:apple" width="32" height="32" className="mr-2" color="#204225" />
                     Data Makanan
+                </button>
+                 <button
+                    className={`flex items-center text-2xl px-7 py-3 transition-all rounded-full duration-200 focus:outline-none ${activeTab === 'role' ? 'bg-[#C8E6C9] text-[#39833C]' : 'bg-green-50 text-[#39833C]'}`}
+                    onClick={() => navigate('/dashboard/role')}
+                >
+                    <Icon icon="mdi:emoticon-happy" width="32" height="32" className="mr-2" color="#204225" />
+                    Role
+                </button>
+                  <button
+                    className={`flex items-center text-2xl px-7 py-3 transition-all rounded-full duration-200 focus:outline-none ${activeTab === 'kategori' ? 'bg-[#C8E6C9] text-[#39833C]' : 'bg-green-50 text-[#39833C]'}`}
+                    onClick={() => navigate('/dashboard/kategori')}
+                >
+                    <Icon icon="mdi:list-box" width="32" height="32" className="mr-2" color="#204225" />
+                    Kategori
                 </button>
             </div>
         </div>

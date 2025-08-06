@@ -35,7 +35,7 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
 					</button>
 					{start > 2 && (
 						<span className="w-8 h-8 flex items-center justify-center text-gray-400 font-bold">
-							...
+							
 						</span>
 					)}
 				</>
@@ -85,6 +85,9 @@ export default function UserDataSection() {
 	const users = [
 		{ id: 1, nama: "ADI SULAIMAN", tgl: "08/10/2012", email: "ADI@GMAIL.COM", jk: "LAKI - LAKI" },
 		{ id: 2, nama: "BUDI MULYANA", tgl: "10/12/2010", email: "BUDI@GMAIL.COM", jk: "LAKI - LAKI" },
+		{ id: 3, nama: "BUDI MULYANA", tgl: "10/12/2010", email: "BUDI@GMAIL.COM", jk: "LAKI - LAKI" },
+		{ id: 4, nama: "BUDI MULYANA", tgl: "10/12/2010", email: "BUDI@GMAIL.COM", jk: "LAKI - LAKI" },
+		{ id: 5, nama: "BUDI MULYANA", tgl: "10/12/2010", email: "BUDI@GMAIL.COM", jk: "LAKI - LAKI" }
 	];
 
 	const [currentPage, setCurrentPage] = useState(1);
@@ -105,6 +108,9 @@ export default function UserDataSection() {
 		<div className="mx-4 my-6">
 			<div className="flex justify-between items-center mb-3 px-2">
 				<div className="text-xl font-bold text-[#222]">DATA PENGGUNA</div>
+				  <button className="w-12 h-12 bg-[#4CAF50]/20 text-[#39833C] text-5xl leading-none rounded-full font-medium flex items-center justify-center ml-2">
+    				<span className="relative -top-[4px]">+</span>
+  				</button>
 			</div>
 
 			<div className="rounded-2xl bg-[#f3f3f3] shadow-inner p-2">
@@ -133,7 +139,7 @@ export default function UserDataSection() {
 							<div className="py-5 px-3 flex gap-2 justify-center">
 								<button
 									className="bg-[#E8C097] text-[#6B3B0A] rounded-md px-4 py-1 font-bold text-xs"
-									onClick={e => { e.stopPropagation(); /* buka modal edit */ }}
+									onClick={e => { e.stopPropagation(); }}
 								>
 									EDIT
 								</button>
