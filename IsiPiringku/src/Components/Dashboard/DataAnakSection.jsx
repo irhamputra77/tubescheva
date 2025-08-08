@@ -1,248 +1,186 @@
-import React, { useState, useEffect } from "react";
-import { Icon } from "@iconify/react";
-import { useNavigate, useLocation } from "react-router-dom";
+import React, { useEffect, useMemo, useState } from "react";
+import axios from "axios";
+import BaseModal from "../common/modal/BaseModal";
+import ChildForm from "../common/modal/form/ChildForm";
+import DeleteConfirmationModal from "../common/modal/DeleteConfirmationModal";
+import Pagination from "../common/pagination";
+import ChildToolbar from "../child/ChildToolbar";
+import ChildTable from "../child/ChildTable";
+import useDebouncedValue from "../hooks/useDebouncedValue";
 
-// Komponen Pagination
-function Pagination({ currentPage, totalPages, onPageChange }) {
-    const pages = [];
-    const maxDisplay = 3;
-    let start = Math.max(1, currentPage - 1);
-    let end = Math.min(totalPages, currentPage + 1);
-
-    if (currentPage === 1) end = Math.min(totalPages, maxDisplay);
-    if (currentPage === totalPages)
-        start = Math.max(1, totalPages - maxDisplay + 1);
-
-    for (let i = start; i <= end; i++) {
-        pages.push(i);
-    }
-
-    return (
-        <div className="flex items-center justify-center gap-1 mt-4">
-            <button
-                onClick={() => onPageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="w-8 h-8 flex items-center justify-center rounded bg-[#388e3c] text-white text-lg font-bold disabled:bg-gray-200 disabled:text-gray-400"
-            >
-                &lt;
-            </button>
-            {start > 1 && (
-                <>
-                    <button
-                        onClick={() => onPageChange(1)}
-                        className="w-8 h-8 rounded flex items-center justify-center bg-white border text-[#388e3c] font-bold"
-                    >
-                        1
-                    </button>
-                    {start > 2 && (
-                        <span className="w-8 h-8 flex items-center justify-center text-gray-400 font-bold">
-                            ...
-                        </span>
-                    )}
-                </>
-            )}
-            {pages.map((page) => (
-                <button
-                    key={page}
-                    onClick={() => onPageChange(page)}
-                    className={`w-8 h-8 rounded flex items-center justify-center font-bold ${page === currentPage
-                        ? "bg-[#388e3c] text-white"
-                        : "bg-white border text-[#388e3c]"
-                        }`}
-                >
-                    {page}
-                </button>
-            ))}
-            {end < totalPages && (
-                <>
-                    {end < totalPages - 1 && (
-                        <span className="w-8 h-8 flex items-center justify-center text-gray-400 font-bold">
-                            ...
-                        </span>
-                    )}
-                    <button
-                        onClick={() => onPageChange(totalPages)}
-                        className="w-8 h-8 rounded flex items-center justify-center bg-white border text-[#388e3c] font-bold"
-                    >
-                        {totalPages}
-                    </button>
-                </>
-            )}
-            <button
-                onClick={() => onPageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="w-8 h-8 flex items-center justify-center rounded bg-[#388e3c] text-white text-lg font-bold disabled:bg-gray-200 disabled:text-gray-400"
-            >
-                &gt;
-            </button>
-        </div>
-    );
-}
+const BASE_URL = ((import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000") + "/")
+    .replace(/\/+$/, "/");
 
 export default function DataAnakSection() {
-    const navigate = useNavigate();
-    const location = useLocation();
-    const [selectedMenu, setSelectedMenu] = useState("data_anak");
-    const [open, setOpen] = useState(false);
+    const [children, setChildren] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
 
-    // Data hasil klik dari UserDataSection via state navigation
-    const userData = location.state;
+    // modal states
+    const [modalOpen, setModalOpen] = useState(false);
+    const [editData, setEditData] = useState(null);
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [deletingId, setDeletingId] = useState(null);
+    const [deleteLoading, setDeleteLoading] = useState(false);
 
-    // Definisikan data users sesuai data navigation atau default
-    const users = userData
-        ? [
-            {
-                nama: userData.nama,
-                tgl: userData.tgl,
-                gender: userData.jk || userData.gender || "-",
-                kelahiran: userData.kelahiran || "-",
-            },
-        ]
-        : [
-            {
-                nama: "DODIT SULAIMAN",
-                tgl: "08/10/2029",
-                gender: "LAKI-LAKI",
-                kelahiran: "NORMAL",
-            },
-            {
-                nama: "SITI SULAIMAN",
-                tgl: "08/10/2029",
-                gender: "PEREMPUAN",
-                kelahiran: "NORMAL",
-            },
-        ];
+    // search
+    const [searchTerm, setSearchTerm] = useState("");
+    const debouncedSearch = useDebouncedValue(searchTerm, 300);
 
+    // pagination
     const [currentPage, setCurrentPage] = useState(1);
-    const usersPerPage = 8;
-    const totalPages = Math.ceil(users.length / usersPerPage);
+    const perPage = 8;
 
-    const displayedUsers = users.slice(
-        (currentPage - 1) * usersPerPage,
-        currentPage * usersPerPage
-    );
-    const emptyRows = usersPerPage - displayedUsers.length;
-
-    const menuOptions = [
-        { label: "Data Anak", value: "data_anak", icon: "mdi:teddy-bear" },
-        { label: "Data Artikel", value: "data_artikel", icon: "material-symbols:article" },
-    ];
-
-    useEffect(() => {
-        if (location.pathname === "/userdetails") setSelectedMenu("data_anak");
-        else if (location.pathname === "/userdetails/artikel") setSelectedMenu("data_artikel");
-    }, [location.pathname]);
-
-    const handleSelect = (value) => {
-        setSelectedMenu(value);
-        setOpen(false);
-        if (value === "data_anak") navigate("/userdetails");
-        if (value === "data_artikel") navigate("/userdetails/artikel");
+    // Fetch
+    const fetchAll = async () => {
+        setLoading(true);
+        setError("");
+        try {
+            const token = localStorage.getItem("token");
+            const res = await axios.get(`${BASE_URL}v1/child`, {
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+            });
+            const rows = res.data?.data || res.data || [];
+            setChildren(Array.isArray(rows) ? rows : []);
+        } catch (err) {
+            if (err.response?.status === 401) {
+                setError("Token tidak valid/expired. Silakan login ulang.");
+                localStorage.removeItem("token");
+            } else {
+                setError(err.message || "Gagal mengambil data anak");
+            }
+        } finally {
+            setLoading(false);
+        }
     };
+
+    useEffect(() => { fetchAll(); }, []);
+    useEffect(() => { setCurrentPage(1); }, [debouncedSearch]);
+
+    // CREATE/UPDATE
+    const handleFormSubmit = async (formValues) => {
+        setLoading(true);
+        setError("");
+        try {
+            const token = localStorage.getItem("token");
+            const fd = new FormData();
+
+            if (formValues.fullname != null) fd.append("fullname", String(formValues.fullname).trim());
+            if (formValues.birthDate) fd.append("birthDate", formValues.birthDate);
+            if (formValues.gender === "m" || formValues.gender === "f") fd.append("gender", formValues.gender);
+            if (formValues.birthCondition != null) fd.append("birthCondition", String(formValues.birthCondition).trim());
+
+            const toInt = (v) => (v === "" || v == null ? null : Number.parseInt(v, 10));
+            const w = toInt(formValues.weight);
+            const h = toInt(formValues.height);
+            const hc = toInt(formValues.headCircumference);
+            if (Number.isInteger(w)) fd.append("weight", String(w));
+            if (Number.isInteger(h)) fd.append("height", String(h));
+            if (Number.isInteger(hc)) fd.append("headCircumference", String(hc));
+            if (formValues.photo instanceof File) fd.append("photo", formValues.photo);
+            else fd.append("photo", "");
+
+            let url = `${BASE_URL}v1/child`;
+            let method = "post";
+            if (editData?.id) { url = `${BASE_URL}v1/child/${editData.id}`; method = "put"; }
+
+            await axios({ url, method, data: fd, headers: { Authorization: `Bearer ${token}` } });
+
+            setModalOpen(false);
+            setEditData(null);
+            await fetchAll();
+        } catch (err) {
+            setError(err.response?.data?.message || err.message || "Gagal menyimpan data anak");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // DELETE
+    const handleDeleteClick = (id) => { setDeletingId(id); setDeleteModalOpen(true); };
+    const confirmDelete = async () => {
+        setDeleteLoading(true);
+        setError("");
+        try {
+            const token = localStorage.getItem("token");
+            await axios.delete(`${BASE_URL}v1/child/${deletingId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setDeleteModalOpen(false);
+            setDeletingId(null);
+            await fetchAll();
+        } catch (err) {
+            setError(err.response?.data?.message || err.message || "Gagal menghapus data anak");
+        } finally {
+            setDeleteLoading(false);
+        }
+    };
+
+    // FILTER + SLICE
+    const filteredRows = useMemo(() => {
+        const q = (debouncedSearch || "").toLowerCase();
+        if (!q) return children;
+        return children.filter((row) => {
+            const parent = (row.parent?.fullname || row.parent?.name || "").toLowerCase();
+            const name = (row.fullname || "").toLowerCase();
+            const gender = row.gender === "m" ? "laki-laki" : row.gender === "f" ? "perempuan" : (row.gender || "").toLowerCase();
+            const cond = (row.birthCondition || "").toLowerCase();
+            return parent.includes(q) || name.includes(q) || gender.includes(q) || cond.includes(q);
+        });
+    }, [children, debouncedSearch]);
+
+    const totalPages = Math.max(1, Math.ceil(filteredRows.length / perPage));
+    const displayedRows = useMemo(() => {
+        const start = (currentPage - 1) * perPage;
+        return filteredRows.slice(start, start + perPage);
+    }, [filteredRows, currentPage]);
+
+    if (loading) return <div className="p-6 text-center">Loading...</div>;
+    if (error) return <div className="p-6 text-center text-red-600">{error}</div>;
 
     return (
         <div className="mx-4 my-6">
-            <button className="bg-[#4CAF50]/20 px-3 pr-50 py-2 rounded-xl text-[#2E7D32] font-semibold mb-3" onClick={() => { navigate("/dashboard") }}>{"< Dashboard"}</button>
-            <div className="flex justify-between items-center mb-3 px-2">
-                <div className="text-xl font-bold text-[#222]" >DATA ANAK</div>
-                {/* Dropdown */}
-                <div className="flex items-center gap-2">
-                    <div className="relative">
-                        <button
-                            onClick={() => setOpen(!open)}
-                            className="flex items-center justify-between gap-2 pl-2 pr-3 py-1.5 text-lg font-semibold text-[#2E7D32] bg-[#E1EFE3] border border-gray-300 rounded-xl w-64"
-                        >
-                            <div className="flex items-center gap-2">
-                                <Icon
-                                    icon={
-                                        menuOptions.find((opt) => opt.value === selectedMenu).icon
-                                    }
-                                    width="20"
-                                    color="#204225"
-                                />
-                                <span className="text-base">
-                                    {menuOptions.find((opt) => opt.value === selectedMenu).label}
-                                </span>
-                            </div>
-                            <Icon
-                                icon="mdi:chevron-down"
-                                width="20"
-                                className={`transition-transform duration-200 ${open ? "rotate-180" : ""
-                                    }`}
-                            />
-                        </button>
-                        {open && (
-                            <ul className="absolute z-10 w-64 mt-1 bg-white border rounded shadow">
-                                {menuOptions.map((opt) => (
-                                    <li
-                                        key={opt.value}
-                                        onClick={() => handleSelect(opt.value)}
-                                        className="flex items-center gap-2 px-4 py-2 text-base hover:bg-[#E1EFE3] cursor-pointer"
-                                    >
-                                        <Icon icon={opt.icon} width="18" />
-                                        {opt.label}
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-                    </div>
-                    <button className="w-12 h-12 bg-[#4CAF50]/20 text-[#39833C] text-5xl leading-none rounded-full font-medium flex items-center justify-center ml-2">
-                        <span className="relative -top-[4px]">+</span>
-                    </button>
-                </div>
-            </div>
+            <ChildToolbar
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+                onAdd={() => { setModalOpen(true); setEditData(null); }}
+            />
 
-            <div className="rounded-2xl bg-[#f3f3f3] shadow-inner p-2">
-                <div className="grid grid-cols-6 bg-[#D7D7D7] text-[#575757] text-sm font-semibold rounded-t-2xl overflow-hidden">
-                    <div className="text-center py-3 px-3 rounded-l-xl">NO</div>
-                    <div className="text-center py-3 px-3">NAMA LENGKAP</div>
-                    <div className="text-center py-3 px-3">TANGGAL LAHIR</div>
-                    <div className="text-center py-3 px-3">GENDER</div>
-                    <div className="text-center py-3 px-3">KONDISI KELAHIRAN</div>
-                    <div className="text-center py-3 px-3 rounded-r-xl">ACTION</div>
-                </div>
-                <div className="divide-y">
-                    {displayedUsers.map((user, i) => (
-                        <div
-                            key={i}
-                            className="grid grid-cols-6 items-center bg-white text-[#222] text-sm"
-                        >
-                            <div className="py-5 px-3 text-center">
-                                {(currentPage - 1) * usersPerPage + i + 1}
-                            </div>
-                            <div className="py-5 px-3 text-center">{user.nama}</div>
-                            <div className="py-5 px-3 text-center">{user.tgl}</div>
-                            <div className="py-5 px-3 text-center">{user.gender}</div>
-                            <div className="py-5 px-3 text-center">{user.kelahiran}</div>
-                            <div className="py-5 px-3 flex gap-2 justify-center">
-                                <button className="bg-[#E8C097] text-[#6B3B0A] rounded-md px-4 py-1 font-bold text-xs">
-                                    EDIT
-                                </button>
-                                <button className="bg-[#A83A3A] text-white rounded-md px-4 py-1 font-bold text-xs">
-                                    HAPUS
-                                </button>
-                            </div>
-                        </div>
-                    ))}
-                    {Array.from({ length: emptyRows }).map((_, idx) => (
-                        <div
-                            key={`empty-${idx}`}
-                            className="grid grid-cols-6 items-center bg-white text-[#222] text-sm"
-                            style={{ minHeight: "56px" }}
-                        >
-                            {Array.from({ length: 6 }).map((__, colIdx) => (
-                                <div key={colIdx} className="py-5 px-3">
-                                    &nbsp;
-                                </div>
-                            ))}
-                        </div>
-                    ))}
-                </div>
-            </div>
+            <ChildTable
+                rows={displayedRows}
+                page={currentPage}
+                perPage={8}
+                onEdit={(row) => { setEditData(row); setModalOpen(true); }}
+                onDelete={handleDeleteClick}
+            />
+
             <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}
                 onPageChange={setCurrentPage}
+            />
+
+            {/* Modal Add/Edit */}
+            <BaseModal
+                show={modalOpen}
+                title={editData ? "Edit Data Anak" : "Tambah Data Anak"}
+                onClose={() => { setModalOpen(false); setEditData(null); }}
+            >
+                <ChildForm
+                    initialData={editData || {}}
+                    onSubmit={handleFormSubmit}
+                    onCancel={() => { setModalOpen(false); setEditData(null); }}
+                />
+            </BaseModal>
+
+            {/* Modal Delete */}
+            <DeleteConfirmationModal
+                show={deleteModalOpen}
+                onClose={() => { setDeleteModalOpen(false); setDeletingId(null); }}
+                onDelete={confirmDelete}
+                loading={deleteLoading}
+                title="Hapus Data Anak?"
+                message="Data yang dihapus tidak dapat dikembalikan."
             />
         </div>
     );

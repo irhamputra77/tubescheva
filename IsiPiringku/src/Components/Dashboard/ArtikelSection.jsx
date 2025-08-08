@@ -1,244 +1,275 @@
-import React, { useState, useEffect } from "react";
-import { Icon } from "@iconify/react";
-import { useNavigate, useLocation } from "react-router-dom";
-
-// Komponen Pagination
-function Pagination({ currentPage, totalPages, onPageChange }) {
-    const pages = [];
-    const maxDisplay = 3;
-    let start = Math.max(1, currentPage - 1);
-    let end = Math.min(totalPages, currentPage + 1);
-
-    if (currentPage === 1) end = Math.min(totalPages, maxDisplay);
-    if (currentPage === totalPages)
-        start = Math.max(1, totalPages - maxDisplay + 1);
-
-    for (let i = start; i <= end; i++) {
-        pages.push(i);
-    }
-
-return (
-    <div className="flex items-center justify-center gap-1 mt-4">
-        <button
-            onClick={() => onPageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="w-8 h-8 flex items-center justify-center rounded bg-[#388e3c] text-white text-lg font-bold disabled:bg-gray-200 disabled:text-gray-400"
-        >
-            &lt;
-        </button>
-        {start > 1 && (
-            <>
-                <button
-                    onClick={() => onPageChange(1)}
-                    className="w-8 h-8 rounded flex items-center justify-center bg-white border text-[#388e3c] font-bold"
-                >
-                    1
-                </button>
-                {start > 2 && (
-                    <span className="w-8 h-8 flex items-center justify-center text-gray-400 font-bold">...</span>
-                )}
-            </>
-        )}
-        {pages.map((page) => (
-            <button
-                key={page}
-                onClick={() => onPageChange(page)}
-                className={`w-8 h-8 rounded flex items-center justify-center font-bold ${page === currentPage
-                    ? "bg-[#388e3c] text-white"
-                    : "bg-white border text-[#388e3c]"
-                    }`}
-            >
-                {page}
-            </button>
-        ))}
-        {end < totalPages && (
-            <>
-                {end < totalPages - 1 && (
-                    <span className="w-8 h-8 flex items-center justify-center text-gray-400 font-bold">...</span>
-                )}
-                <button
-                    onClick={() => onPageChange(totalPages)}
-                    className="w-8 h-8 rounded flex items-center justify-center bg-white border text-[#388e3c] font-bold"
-                >
-                    {totalPages}
-                </button>
-            </>
-        )}
-        <button
-            onClick={() => onPageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="w-8 h-8 flex items-center justify-center rounded bg-[#388e3c] text-white text-lg font-bold disabled:bg-gray-200 disabled:text-gray-400"
-        >
-            &gt;
-        </button>
-    </div>
-);
-}
-
+import React, { useState, useEffect, useMemo } from "react";
+import axios from "axios";
+import BaseModal from "../common/modal/BaseModal";
+import ArticleForm from "../common/modal/form/ArticleForm";
+import DeleteConfirmationModal from "../common/modal/DeleteConfirmationModal";
+import Pagination from "../common/pagination.jsx";
+import useDebouncedValue from "../hooks/useDebouncedValue.jsx";
+import ArticleToolbar from "../article/ArticleToolbar.jsx";
+import ArticleTable from "../article/ArticleTable.jsx";
 
 export default function ArticleSection() {
-const navigate = useNavigate();
-const location = useLocation();
+    // Ambil dari ENV dan rapikan trailing slash
+    const BASE_URL = ((import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000") + "/")
+        .replace(/\/+$/, "/");
 
-const [selectedMenu, setSelectedMenu] = useState("data_pengguna");
+    const [authorMap, setAuthorMap] = useState({});
+    const [articles, setArticles] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
 
-useEffect(() => {
-    if (location.pathname === "/userdetails") setSelectedMenu("data_anak");
-    else if (location.pathname === "/userdetails/artikel") setSelectedMenu("data_artikel");
-}, [location.pathname]);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [editData, setEditData] = useState(null);
 
-const [open, setOpen] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 8;
+    const [previewTitle, setPreviewTitle] = useState(null);
+    const [previewDescription, setPreviewDescription] = useState(null);
+    const [previewImage, setPreviewImage] = useState(null);
 
-const menuOptions = [
-    { label: "Data Anak", value: "data_anak", icon: "mdi:teddy-bear" },
-    { label: "Data Artikel", value: "data_artikel", icon: "material-symbols:article" },
-];
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [deletingId, setDeletingId] = useState(null);
+    const [deleteLoading, setDeleteLoading] = useState(false);
 
-const handleSelect = (value) => {
-    setSelectedMenu(value);
-    setOpen(false);
-    if (value === "data_anak") navigate("/userdetails");
-    if (value === "data_artikel") navigate("/userdetails/artikel");
-};
+    // search w/ debounce
+    const [searchTerm, setSearchTerm] = useState("");
+    const debouncedSearch = useDebouncedValue(searchTerm, 300);
 
-const selectedMenuObj = menuOptions.find(opt => opt.value === selectedMenu);
+    // Fetch articles
+    const fetchData = async (page = 1) => {
+        setLoading(true);
+        setError("");
+        try {
+            const token = localStorage.getItem("token");
+            const response = await axios.get(`${BASE_URL}v1/article`, {
+                params: { page, pageSize: itemsPerPage },
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setArticles(response.data.data || []);
+        } catch (err) {
+            if (err.response?.status === 401) setError("Token invalid/expired. Login ulang.");
+            else setError(err.message || "Failed to fetch article data");
+        } finally {
+            setLoading(false);
+        }
+    };
 
-const rows = [
-    {
-        judul: "Nutrisi, Pengertian dan jenis - jenisnya yang perlu diketahui",
-        deskripsi: "Nutrisi adalah aspek fundamental bagi kesehatan dan perkembangan ....",
-        tanggal: "08/10/2029",
-        status: "POST"
-    },
-    {
-        judul: "Nutrisi, Pengertian dan jenis - jenisnya yang perlu diketahui",
-        deskripsi: "Nutrisi adalah aspek fundamental bagi kesehatan dan perkembangan ....",
-        tanggal: "08/10/2029",
-        status: "PENDING"
-    },
-    {
-        judul: "Nutrisi, Pengertian dan jenis - jenisnya yang perlu diketahui",
-        deskripsi: "Nutrisi adalah aspek fundamental bagi kesehatan dan perkembangan ....",
-        tanggal: "08/10/2029",
-        status: "POST"
-    },
-    {
-        judul: "Nutrisi, Pengertian dan jenis - jenisnya yang perlu diketahui",
-        deskripsi: "Nutrisi adalah aspek fundamental bagi kesehatan dan perkembangan ....",
-        tanggal: "08/10/2029",
-        status: "CANCEL"
-    },
-    {
-        judul: "Nutrisi, Pengertian dan jenis - jenisnya yang perlu diketahui",
-        deskripsi: "Nutrisi adalah aspek fundamental bagi kesehatan dan perkembangan ....",
-        tanggal: "08/10/2029",
-        status: "PENDING"
-    },
-    {
-        judul: "Nutrisi, Pengertian dan jenis - jenisnya yang perlu diketahui",
-        deskripsi: "Nutrisi adalah aspek fundamental bagi kesehatan dan perkembangan ....",
-        tanggal: "08/10/2029",
-        status: "CANCEL"
-    },
-    {
-        judul: "Nutrisi, Pengertian dan jenis - jenisnya yang perlu diketahui",
-        deskripsi: "Nutrisi adalah aspek fundamental bagi kesehatan dan perkembangan ....",
-        tanggal: "08/10/2029",
-        status: "PENDING"
-    }
-];
+    useEffect(() => { fetchData(currentPage); }, [currentPage]);
 
-const [currentPage, setCurrentPage] = useState(1);
-const itemsPerPage = 8;
-const totalPages = Math.ceil(rows.length / itemsPerPage);
-const displayedRows = rows.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-const emptyRows = itemsPerPage - displayedRows.length;
+    // Lazy fetch author name map
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!articles.length || !token) return;
 
-function getStatusStyle(status) {
-    if (status === "POST") return "bg-[#CFF5D1] text-[#39833C] border-[#7BE495]";
-    if (status === "PENDING") return "bg-[#F7F7BB] text-[#B68B13] border-[#E5DE61]";
-    if (status === "CANCEL") return "bg-[#FFD9D9] text-[#C23C3C] border-[#EBA3A3]";
-    return "";
-}
+        const unknownIds = Array.from(new Set(articles.map(a => a.AuthorId).filter(Boolean)))
+            .filter(id => !authorMap[id]);
 
-return (
-    <div className="mx-4 my-6">
-        <button className="bg-[#4CAF50]/20 px-3 pr-50 py-2 rounded-xl text-[#2E7D32] font-semibold mb-3" onClick={() => { navigate("/dashboard") }}>{"< Dashboard"}</button>
-        <div className="flex justify-between items-center mb-3 px-2">
-            <div className="flex flex-col items-start">
-                <div className="text-xl font-semibold text-[#222] text-[30px]">ADI SULAIMAN</div>
-            </div>
-            <div className="flex items-center gap-2">
-                <div className="relative">
-                    <button
-                        onClick={() => setOpen(!open)}
-                        className="flex items-center justify-between gap-2 pl-2 pr-3 py-1.5 text-lg font-semibold text-[#2E7D32] bg-[#E1EFE3] border border-gray-300 rounded-xl w-64"
-                    >
-                        <div className="flex items-center gap-2">
-                            <Icon icon={selectedMenuObj?.icon || "mdi:help-circle-outline"} width="20" color="#204225" />
-                            <span className="text-base">{selectedMenuObj?.label || "Pilih Menu"}</span>
-                        </div>
-                        <Icon icon="mdi:chevron-down" width="20" className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
-                    </button>
-                    {open && (
-                        <ul className="absolute z-10 w-64 mt-1 bg-white border rounded shadow">
-                            {menuOptions.map((opt) => (
-                                <li
-                                    key={opt.value}
-                                    onClick={() => handleSelect(opt.value)}
-                                    className="flex items-center gap-2 px-4 py-2 text-base hover:bg-[#E1EFE3] cursor-pointer"
-                                >
-                                    <Icon icon={opt.icon} width="18" />
-                                    {opt.label}
-                                </li>
-                            ))}
-                        </ul>
-                    )}
+        if (!unknownIds.length) return;
+
+        Promise.all(
+            unknownIds.map(id =>
+                axios
+                    .get(`${BASE_URL}v1/user/${id}`, { headers: { Authorization: `Bearer ${token}` } })
+                    .then(res => {
+                        const u = res.data?.data || res.data || {};
+                        return { id, name: u.fullname || u.nama || u.name || "-" };
+                    })
+                    .catch(() => ({ id, name: "-" }))
+            )
+        ).then(list => {
+            setAuthorMap(prev => {
+                const next = { ...prev };
+                list.forEach(({ id, name }) => { next[id] = name; });
+                return next;
+            });
+        });
+    }, [articles]); // eslint-disable-line
+
+    // Filter client-side
+    const filteredArticles = useMemo(() => {
+        const q = (debouncedSearch || "").toLowerCase();
+        if (!q) return articles;
+        return articles.filter(a => {
+            const title = (a.title || "").toLowerCase();
+            const desc = (a.description || "").toLowerCase();
+            const stat = (a.status || "").toLowerCase();
+            const author = (authorMap[a.AuthorId] || "").toLowerCase();
+            return title.includes(q) || desc.includes(q) || stat.includes(q) || author.includes(q);
+        });
+    }, [articles, debouncedSearch, authorMap]);
+
+    useEffect(() => { setCurrentPage(1); }, [debouncedSearch]);
+
+    // Pagination berdasarkan hasil filter
+    const filteredTotalPages = Math.max(1, Math.ceil((filteredArticles.length || 0) / itemsPerPage));
+    const displayedArticles = useMemo(() => {
+        const start = (currentPage - 1) * itemsPerPage;
+        return filteredArticles.slice(start, start + itemsPerPage);
+    }, [filteredArticles, currentPage]);
+
+    // Submit form (tambah/edit)
+    const handleFormSubmit = async (formData) => {
+        setLoading(true);
+        setError("");
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) throw new Error("Belum login!");
+            const fd = new FormData();
+
+            if (formData.image instanceof File) fd.append("image", formData.image);
+            else fd.append("image", "");
+            Object.entries(formData).forEach(([k, v]) => {
+                if (k !== "image" && v !== undefined && v !== null) fd.append(k, v);
+            });
+
+            let url = `${BASE_URL}v1/article`;
+            let method = "post";
+            if (editData) { url = `${BASE_URL}v1/article/${editData.id}`; method = "put"; }
+
+            await axios({ url, method, headers: { Authorization: `Bearer ${token}` }, data: fd });
+
+            fetchData(currentPage);
+            setModalOpen(false);
+            setEditData(null);
+        } catch (err) {
+            if (err.response?.status === 401) setError("Token tidak valid/expired.");
+            else setError(err.message || "Gagal submit artikel.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Delete
+    const handleDeleteClick = (id) => { setDeletingId(id); setDeleteModalOpen(true); };
+    const confirmDeleteArticle = async () => {
+        setDeleteLoading(true);
+        setError("");
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) throw new Error("Belum login!");
+            await axios.delete(`${BASE_URL}v1/article/${deletingId}`, { headers: { Authorization: `Bearer ${token}` } });
+            setDeleteModalOpen(false);
+            setDeletingId(null);
+            fetchData(currentPage);
+        } catch (err) {
+            if (err.response?.status === 401) setError("Token invalid/expired.");
+            else setError(err.message || "Gagal hapus artikel");
+        } finally {
+            setDeleteLoading(false);
+        }
+    };
+
+    if (loading) return <div className="p-6 text-center">Loading...</div>;
+    if (error) return <div className="p-6 text-center text-red-600">{error}</div>;
+
+    return (
+        <div className="mx-4 my-6">
+            <ArticleToolbar
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+                onAdd={() => { setModalOpen(true); setEditData(null); }}
+            />
+
+            <ArticleTable
+                rows={displayedArticles}
+                page={currentPage}
+                perPage={8}
+                baseUrl={BASE_URL}
+                authorMap={authorMap}
+                onEdit={(row) => { setEditData(row); setModalOpen(true); }}
+                onDelete={handleDeleteClick}
+                onPreviewImage={(url) => setPreviewImage(url)}
+                onPreviewDescription={(text) => setPreviewDescription(text)}
+                onPreviewTitle={(text) => setPreviewTitle(text)}
+            />
+
+            <Pagination
+                currentPage={currentPage}
+                totalPages={filteredTotalPages}
+                onPageChange={setCurrentPage}
+            />
+
+            {/* MODAL FORM */}
+            <BaseModal
+                show={modalOpen}
+                title={editData ? "Edit Artikel" : "Add Artikel"}
+                onClose={() => { setModalOpen(false); setEditData(null); }}
+            >
+                <ArticleForm
+                    initialData={editData || {}}
+                    onSubmit={handleFormSubmit}
+                    onCancel={() => { setModalOpen(false); setEditData(null); }}
+                    submitLabel={editData ? "Edit" : "Add"}
+                />
+            </BaseModal>
+
+            {/* MODAL DELETE */}
+            <DeleteConfirmationModal
+                show={deleteModalOpen}
+                onClose={() => { setDeleteModalOpen(false); setDeletingId(null); }}
+                onDelete={confirmDeleteArticle}
+                loading={deleteLoading}
+            />
+
+            {/* PREVIEW GAMBAR */}
+            {previewImage && (
+                <div
+                    className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center"
+                    onClick={() => setPreviewImage(null)}
+                    style={{ cursor: "zoom-out" }}
+                >
+                    <img
+                        src={previewImage}
+                        alt="preview"
+                        className="max-w-[90vw] max-h-[90vh] rounded-lg shadow-2xl border-4 border-white"
+                        onClick={(e) => e.stopPropagation()}
+                    />
                 </div>
-                <button className="w-12 h-12 bg-[#4CAF50]/20 text-[#39833C] text-5xl leading-none rounded-full font-medium flex items-center justify-center ml-2">
-                    <span className="relative -top-[4px]">+</span>
-                </button>
-            </div>
-        </div>
+            )}
 
-        <div className="rounded-2xl bg-[#f3f3f3] shadow-inner p-2">
-            <div className="grid grid-cols-7 bg-[#D7D7D7] text-[#575757] text-sm font-semibold rounded-t-2xl overflow-hidden">
-                <div className="py-3 px-3 rounded-l-xl text-center">NO</div>
-                <div className="py-3 px-3 text-center">JUDUL</div>
-                <div className="py-3 px-3 text-center">DESKRIPSI</div>
-                <div className="py-3 px-3 text-center">TANGGAL</div>
-                <div className="py-3 px-3 text-center">STATUS</div>
-                <div className="py-3 px-3 text-center rounded-r-xl col-span-2">ACTION</div>
-            </div>
-            <div className="divide-y">
-                {displayedRows.map((row, i) => (
-                    <div key={i} className="grid grid-cols-7 items-center bg-white text-[#222] text-sm">
-                        <div className="py-5 px-3 text-center">{(currentPage - 1) * itemsPerPage + i + 1}</div>
-                        <div className="py-5 px-3">{row.judul}</div>
-                        <div className="py-5 px-3">{row.deskripsi}</div>
-                        <div className="py-5 px-3 text-center font-bold">{row.tanggal}</div>
-                        <div className="py-5 px-3 flex justify-center">
-                            <span className={`px-5 py-1 rounded-lg font-semibold text-sm border ${getStatusStyle(row.status)}`}>
-                                {row.status}
-                            </span>
-                        </div>
-                        <div className="py-5 px-3 flex gap-2 justify-center col-span-2">
-                            <button className="bg-[#E8C097] text-[#6B3B0A] rounded-md px-4 py-1 font-bold text-xs">EDIT</button>
-                            <button className="bg-[#A83A3A] text-white rounded-md px-4 py-1 font-bold text-xs">HAPUS</button>
-                        </div>
+            {/* PREVIEW DESKRIPSI */}
+            {previewDescription && (
+                <div
+                    className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center"
+                    onClick={() => setPreviewDescription(null)}
+                >
+                    <div
+                        className="bg-white rounded-lg shadow-lg max-w-lg w-full p-6 relative"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button
+                            className="absolute top-2 right-2 text-gray-500 hover:text-red-500 text-xl"
+                            onClick={() => setPreviewDescription(null)}
+                        >
+                            &times;
+                        </button>
+                        <h2 className="font-bold text-lg mb-2">Deskripsi Artikel</h2>
+                        <div className="whitespace-pre-line text-gray-800">{previewDescription}</div>
                     </div>
-                ))}
-                {Array.from({ length: emptyRows }).map((_, idx) => (
-                    <div key={`empty-${idx}`} className="grid grid-cols-7 bg-white text-[#222] text-sm" style={{ minHeight: '84px' }}>
-                        {Array.from({ length: 7 }).map((__, colIdx) => (
-                            <div key={colIdx} className="py-5 px-3">&nbsp;</div>
-                        ))}
-                    </div>
-                ))}
-            </div>
-        </div>
+                </div>
+            )}
 
-        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
-    </div>
-);
+            {previewTitle && (
+                <div
+                    className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center"
+                    onClick={() => setPreviewTitle(null)}
+                >
+                    <div
+                        className="bg-white rounded-lg shadow-lg max-w-xl w-full p-6 relative"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button
+                            className="absolute top-2 right-2 text-gray-500 hover:text-red-500 text-xl"
+                            onClick={() => setPreviewTitle(null)}
+                            aria-label="Close"
+                        >
+                            &times;
+                        </button>
+                        <h2 className="font-bold text-lg mb-3">Judul Lengkap</h2>
+                        <div className="text-gray-900 break-words">{previewTitle}</div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
 }

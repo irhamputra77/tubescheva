@@ -1,28 +1,56 @@
-import logo from '../../assets/Logo Tulisan Bawah 1.png';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
-export default function NavbarDashboard() {
 
-return (
-    <nav className="flex items-center justify-between px-1 pt-3">
-        <div className="flex items-center space-x-3">
-            <img src={logo} alt="Isi Piringku" />
-        </div>
-        <div className="flex-1 mx-10">
-            <div className="flex items-center bg-[#FFFFFF] rounded-2xl px-4">
-                <Icon icon="ic:round-search" width="32" height="32" color="#9bd4a0" className="mr-2" />
-                <input
-                    type="text"
-                    placeholder="Search Anything..."
-                    className="w-full bg-transparent py-3 px-2 text-green-700 placeholder:text-[#9bd4a0] focus:outline-none text-2xl italic"
-                />
+import logo from "../../assets/Logo Tulisan Bawah 1.png";
+import TabNavDashboard from "./TabNavDashboard";
+
+function getFromStorage(key) {
+    return localStorage.getItem(key) ?? sessionStorage.getItem(key);
+}
+
+export default function NavbarDashboard() {
+    const navigate = useNavigate();
+    const [fullname, setFullname] = useState("User");
+
+    useEffect(() => {
+        const storedName = getFromStorage("fullname");
+        if (storedName) {
+            setFullname(storedName);
+        }
+    }, []);
+
+    const handleLogout = () => {
+        ["token", "fullname", "uid", "user", "token_expires_at"].forEach((k) => {
+            localStorage.removeItem(k);
+            sessionStorage.removeItem(k);
+        });
+        navigate("/login");
+    };
+
+    return (
+        <nav className="flex items-center justify-between gap-3 px-4 py-3">
+            {/* Logo */}
+            <div className="flex items-center gap-3">
+                <img src={logo} alt="Isi Piringku" />
             </div>
-        </div>
-        <div className="flex items-center space-x-2">
-            <div className="flex items-center space-x-2">
-                <Icon icon="mdi:account-circle" width="40" height="40" color="#204225" />
-                <span className="text-green-900">User</span>
+
+            {/* Tabs */}
+            <div className="flex-1 px-4">
+                <TabNavDashboard />
             </div>
-        </div>
-    </nav>
-);
+
+            {/* Nama User + Logout */}
+            <div className="flex items-center gap-3">
+                <span className="text-green-900 font-medium">{fullname}</span>
+                <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-1 rounded-md bg-red-500 px-3 py-1 text-white hover:bg-red-600"
+                >
+                    <Icon icon="mdi:logout" className="text-lg" />
+                    Logout
+                </button>
+            </div>
+        </nav>
+    );
 }

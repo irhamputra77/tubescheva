@@ -1,128 +1,154 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import axios from "axios";
 
-function Pagination({ currentPage, totalPages, onPageChange }) {
-    const pages = [];
-    const maxDisplay = 3;
-    let start = Math.max(1, currentPage - 1);
-    let end = Math.min(totalPages, currentPage + 1);
+import BaseModal from "../common/modal/BaseModal";
+import DeleteConfirmationModal from "../common/modal/DeleteConfirmationModal";
+import CategoryForm from "../common/modal/form/CategoryForm";
+import Pagination from "../common/pagination.jsx";
 
-    if (currentPage === 1) end = Math.min(totalPages, maxDisplay);
-    if (currentPage === totalPages) start = Math.max(1, totalPages - maxDisplay + 1);
+import CategoryToolbar from "../category/CategoryToolbar.jsx";
+import CategoryTable from "../category/CategoryTable.jsx";
+import useDebouncedValue from "../hooks/useDebouncedValue.jsx";
 
-    for (let i = start; i <= end; i++) {
-        pages.push(i);
-    }
+// Ambil BASE dari ENV, rapikan trailing slash, lalu bentuk endpoint kategori
+const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000").replace(/\/+$/, "");
+const CATEGORY_URL = `${API_BASE}/v1/category`;
 
-return (
-    <div className="flex items-center justify-center gap-1 mt-4">
-        <button
-            onClick={() => onPageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="w-8 h-8 flex items-center justify-center rounded bg-[#388e3c] text-white text-lg font-bold disabled:bg-gray-200 disabled:text-gray-400"
-        >&lt;</button>
+export default function KategoriTableSection() {
+    const [categories, setCategories] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 8;
 
-        {start > 1 && (
-            <>
-                <button onClick={() => onPageChange(1)} className="w-8 h-8 rounded flex items-center justify-center bg-white border text-[#388e3c] font-bold">1</button>
-                {start > 2 && <span className="w-8 h-8 flex items-center justify-center text-gray-400 font-bold">...</span>}
-            </>
-        )}
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
 
-        {pages.map((page) => (
-            <button
-                key={page}
-                onClick={() => onPageChange(page)}
-                className={`w-8 h-8 rounded flex items-center justify-center font-bold ${page === currentPage ? "bg-[#388e3c] text-white" : "bg-white border text-[#388e3c]"}`}
+    const [modalOpen, setModalOpen] = useState(false);
+    const [editData, setEditData] = useState(null);
+    const [confirmDelete, setConfirmDelete] = useState({ show: false, id: null });
+    const [deleteLoading, setDeleteLoading] = useState(false);
+
+    // --- SEARCH (client-side) ---
+    const [searchTerm, setSearchTerm] = useState("");
+    const debouncedSearch = useDebouncedValue(searchTerm, 300);
+
+    const filteredCategories = useMemo(() => {
+        const q = (debouncedSearch || "").toLowerCase();
+        if (!q) return categories;
+        return categories.filter((c) => (c.name || "").toLowerCase().includes(q));
+    }, [categories, debouncedSearch]);
+    // -----------------------------
+
+    // Fetch kategori
+    const fetchCategories = async () => {
+        setLoading(true);
+        setError("");
+        try {
+            const token = localStorage.getItem("token");
+            const res = await axios.get(CATEGORY_URL, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setCategories(res.data?.data || []);
+        } catch (e) {
+            setError(e?.message || "Gagal memuat data kategori.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => { fetchCategories(); }, []);
+    useEffect(() => { setCurrentPage(1); }, [debouncedSearch]); // reset halaman saat keyword berubah
+
+    // Add/Edit handler
+    const handleFormSubmit = async (data) => {
+        const token = localStorage.getItem("token");
+        try {
+            if (editData) {
+                await axios.put(`${CATEGORY_URL}/${editData.id}`, data, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+            } else {
+                await axios.post(CATEGORY_URL, data, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+            }
+            setModalOpen(false);
+            setEditData(null);
+            fetchCategories();
+        } catch (e) {
+            alert(e?.message || "Gagal menyimpan kategori.");
+        }
+    };
+
+    // Hapus handler
+    const handleDelete = async (id) => {
+        setDeleteLoading(true);
+        const token = localStorage.getItem("token");
+        try {
+            await axios.delete(`${CATEGORY_URL}/${id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setConfirmDelete({ show: false, id: null });
+            fetchCategories();
+        } catch (e) {
+            alert(e?.message || "Gagal menghapus kategori.");
+        } finally {
+            setDeleteLoading(false);
+        }
+    };
+
+    // Pagination (berdasarkan hasil filter)
+    const totalPages = Math.max(1, Math.ceil(filteredCategories.length / itemsPerPage));
+    const displayedRows = useMemo(() => {
+        const start = (currentPage - 1) * itemsPerPage;
+        return filteredCategories.slice(start, start + itemsPerPage);
+    }, [filteredCategories, currentPage]);
+
+    return (
+        <div className="mx-4 my-6">
+            <CategoryToolbar
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+                onAdd={() => { setEditData(null); setModalOpen(true); }}
+            />
+
+            {loading ? (
+                <div className="text-center py-8">Loading...</div>
+            ) : error ? (
+                <div className="text-center text-red-500 py-8">{error}</div>
+            ) : (
+                <CategoryTable
+                    rows={displayedRows}
+                    page={currentPage}
+                    perPage={itemsPerPage}
+                    onEdit={(row) => { setEditData(row); setModalOpen(true); }}
+                    onDelete={(id) => setConfirmDelete({ show: true, id })}
+                    deleteLoading={deleteLoading}
+                />
+            )}
+
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+
+            {/* Modal Add/Edit */}
+            <BaseModal
+                show={modalOpen}
+                title={editData ? "Edit Kategori" : "Add Kategori"}
+                onClose={() => { setModalOpen(false); setEditData(null); }}
             >
-                {page}
-            </button>
-        ))}
+                <CategoryForm
+                    initialData={editData}
+                    onSubmit={handleFormSubmit}
+                    onCancel={() => { setModalOpen(false); setEditData(null); }}
+                    submitLabel={editData ? "Update" : "Add"}
+                />
+            </BaseModal>
 
-        {end < totalPages && (
-            <>
-                {end < totalPages - 1 && <span className="w-8 h-8 flex items-center justify-center text-gray-400 font-bold">...</span>}
-                <button onClick={() => onPageChange(totalPages)} className="w-8 h-8 rounded flex items-center justify-center bg-white border text-[#388e3c] font-bold">{totalPages}</button>
-            </>
-        )}
-
-        <button
-            onClick={() => onPageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="w-8 h-8 flex items-center justify-center rounded bg-[#388e3c] text-white text-lg font-bold disabled:bg-gray-200 disabled:text-gray-400"
-        >&gt;</button>
-    </div>
-);
-}
-
-export default function ArtikelTableOnly() {
-const rows = [
-    { judul: "Nutrisi, Pengertian dan jenis - jenisnya yang perlu diketahui", deskripsi: "Nutrisi adalah aspek fundamental bagi kesehatan dan perkembangan ....", tanggal: "08/10/2029", status: "POST" },
-    { judul: "Nutrisi, Pengertian dan jenis - jenisnya yang perlu diketahui", deskripsi: "Nutrisi adalah aspek fundamental bagi kesehatan dan perkembangan ....", tanggal: "08/10/2029", status: "PENDING" },
-    { judul: "Nutrisi, Pengertian dan jenis - jenisnya yang perlu diketahui", deskripsi: "Nutrisi adalah aspek fundamental bagi kesehatan dan perkembangan ....", tanggal: "08/10/2029", status: "POST" },
-    { judul: "Nutrisi, Pengertian dan jenis - jenisnya yang perlu diketahui", deskripsi: "Nutrisi adalah aspek fundamental bagi kesehatan dan perkembangan ....", tanggal: "08/10/2029", status: "CANCEL" },
-    { judul: "Nutrisi, Pengertian dan jenis - jenisnya yang perlu diketahui", deskripsi: "Nutrisi adalah aspek fundamental bagi kesehatan dan perkembangan ....", tanggal: "08/10/2029", status: "PENDING" },
-    { judul: "Nutrisi, Pengertian dan jenis - jenisnya yang perlu diketahui", deskripsi: "Nutrisi adalah aspek fundamental bagi kesehatan dan perkembangan ....", tanggal: "08/10/2029", status: "CANCEL" },
-    { judul: "Nutrisi, Pengertian dan jenis - jenisnya yang perlu diketahui", deskripsi: "Nutrisi adalah aspek fundamental bagi kesehatan dan perkembangan ....", tanggal: "08/10/2029", status: "PENDING" }
-];
-
-const [currentPage, setCurrentPage] = useState(1);
-const itemsPerPage = 8;
-const totalPages = Math.ceil(rows.length / itemsPerPage);
-const displayedRows = rows.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-const emptyRows = itemsPerPage - displayedRows.length;
-
-function getStatusStyle(status) {
-    if (status === "POST") return "bg-[#CFF5D1] text-[#39833C] border-[#7BE495]";
-    if (status === "PENDING") return "bg-[#F7F7BB] text-[#B68B13] border-[#E5DE61]";
-    if (status === "CANCEL") return "bg-[#FFD9D9] text-[#C23C3C] border-[#EBA3A3]";
-    return "";
-}
-
-return (
-    <div className="mx-4 my-6">
-    <div className="flex items-center justify-between mb-3 px-2"> {/* ✨ */}
-            <h2 className="text-xl font-bold text-[#222]">KATEGORI ARTIKEL</h2> {/* ✨ */}
-            <button className="w-12 h-12 bg-[#4CAF50]/20 text-[#39833C] text-5xl leading-none rounded-full font-medium flex items-center justify-center"> {/* ✨ */}
-                <span className="relative -top-[4px]">+</span>
-            </button>
+            {/* Modal Delete */}
+            <DeleteConfirmationModal
+                show={confirmDelete.show}
+                onClose={() => setConfirmDelete({ show: false, id: null })}
+                onDelete={() => handleDelete(confirmDelete.id)}
+                loading={deleteLoading}
+            />
         </div>
-
-        <div className="rounded-2xl bg-[#f3f3f3] shadow-inner p-2">
-            <div className="grid grid-cols-7 bg-[#D7D7D7] text-[#575757] text-sm font-semibold rounded-t-2xl overflow-hidden">
-                <div className="py-3 px-3 rounded-l-xl text-center">NO</div>
-                <div className="py-3 px-3 text-center">JUDUL</div>
-                <div className="py-3 px-3 text-center">DESKRIPSI</div>
-                <div className="py-3 px-3 text-center">TANGGAL</div>
-                <div className="py-3 px-3 text-center">STATUS</div>
-                <div className="py-3 px-3 text-center rounded-r-xl col-span-2">ACTION</div>
-            </div>
-            <div className="divide-y">
-                {displayedRows.map((row, i) => (
-                    <div key={i} className="grid grid-cols-7 items-center bg-white text-[#222] text-sm">
-                        <div className="py-5 px-3 text-center">{(currentPage - 1) * itemsPerPage + i + 1}</div>
-                        <div className="py-5 px-3">{row.judul}</div>
-                        <div className="py-5 px-3">{row.deskripsi}</div>
-                        <div className="py-5 px-3 text-center font-bold">{row.tanggal}</div>
-                        <div className="py-5 px-3 flex justify-center">
-                            <span className={`px-5 py-1 rounded-lg font-semibold text-sm border ${getStatusStyle(row.status)}`}>{row.status}</span>
-                        </div>
-                        <div className="py-5 px-3 flex gap-2 justify-center col-span-2">
-                            <button className="bg-[#E8C097] text-[#6B3B0A] rounded-md px-4 py-1 font-bold text-xs">EDIT</button>
-                            <button className="bg-[#A83A3A] text-white rounded-md px-4 py-1 font-bold text-xs">HAPUS</button>
-                        </div>
-                    </div>
-                ))}
-                {Array.from({ length: emptyRows }).map((_, idx) => (
-                    <div key={`empty-${idx}`} className="grid grid-cols-7 bg-white text-[#222] text-sm" style={{ minHeight: '84px' }}>
-                        {Array.from({ length: 7 }).map((__, colIdx) => (
-                            <div key={colIdx} className="py-5 px-3">&nbsp;</div>
-                        ))}
-                    </div>
-                ))}
-            </div>
-        </div>
-
-        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
-    </div>
-);
+    );
 }

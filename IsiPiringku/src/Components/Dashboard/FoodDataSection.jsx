@@ -1,142 +1,196 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import axios from "axios";
 
-function Pagination({ currentPage, totalPages, onPageChange }) {
-    const pages = [];
-    const maxDisplay = 3;
-    let start = Math.max(1, currentPage - 1);
-    let end = Math.min(totalPages, currentPage + 1);
+import BaseModal from "../common/modal/BaseModal";
+import FoodForm from "../common/modal/form/FoodForm";
+import DeleteConfirmationModal from "../common/modal/DeleteConfirmationModal";
+import Pagination from "../common/pagination.jsx";
 
-    if (currentPage === 1) end = Math.min(totalPages, maxDisplay);
-    if (currentPage === totalPages) start = Math.max(1, totalPages - maxDisplay + 1);
-
-    for (let i = start; i <= end; i++) {
-        pages.push(i);
-    }
-
-return (
-    <div className="flex items-center justify-center gap-1 mt-4">
-        <button
-            onClick={() => onPageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="w-8 h-8 flex items-center justify-center rounded bg-[#388e3c] text-white text-lg font-bold disabled:bg-gray-200 disabled:text-gray-400"
-        >
-            &lt;
-        </button>
-        {start > 1 && (
-            <>
-                <button
-                    onClick={() => onPageChange(1)}
-                    className="w-8 h-8 rounded flex items-center justify-center bg-white border text-[#388e3c] font-bold"
-                >
-                    1
-                </button>
-                {start > 2 && (
-                    <span className="w-8 h-8 flex items-center justify-center text-gray-400 font-bold">...</span>
-                )}
-            </>
-        )}
-        {pages.map((page) => (
-            <button
-                key={page}
-                onClick={() => onPageChange(page)}
-                className={`w-8 h-8 rounded flex items-center justify-center font-bold ${page === currentPage
-                    ? "bg-[#388e3c] text-white"
-                    : "bg-white border text-[#388e3c]"}`
-                }
-            >
-                {page}
-            </button>
-        ))}
-        {end < totalPages && (
-            <>
-                {end < totalPages - 1 && (
-                    <span className="w-8 h-8 flex items-center justify-center text-gray-400 font-bold">...</span>
-                )}
-                <button
-                    onClick={() => onPageChange(totalPages)}
-                    className="w-8 h-8 rounded flex items-center justify-center bg-white border text-[#388e3c] font-bold"
-                >
-                    {totalPages}
-                </button>
-            </>
-        )}
-        <button
-            onClick={() => onPageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="w-8 h-8 flex items-center justify-center rounded bg-[#388e3c] text-white text-lg font-bold disabled:bg-gray-200 disabled:text-gray-400"
-        >
-            &gt;
-        </button>
-    </div>
-);
-}
+import FoodToolbar from "../food/FoodToolbar.jsx";
+import FoodTable from "../food/FoodTable.jsx";
+import useDebouncedValue from "../hooks/useDebouncedValue.jsx";
 
 export default function FoodDataSection() {
-    const foods = [
-        { nama: "NASI", berat: "90/G", kalori: "200", lemak: "200", protein: "200", karbo: "200" },
-        { nama: "AYAM GORENG", berat: "90/G", kalori: "200", lemak: "200", protein: "200", karbo: "200" },
-        { nama: "AYAM GORENG", berat: "90/G", kalori: "200", lemak: "200", protein: "200", karbo: "200" },
-        { nama: "AYAM GORENG", berat: "90/G", kalori: "200", lemak: "200", protein: "200", karbo: "200" },
-        { nama: "AYAM GORENG", berat: "90/G", kalori: "200", lemak: "200", protein: "200", karbo: "200" },
-    ];
+    // ── BASE URL dari ENV (tanpa trailing slash ganda) ────────────────────────────
+    const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000").replace(/\/+$/, "");
+    const FOOD_URL = `${API_BASE}/v1/food-item`;
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    const [foods, setFoods] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+
+    const [modalOpen, setModalOpen] = useState(false);
+    const [editData, setEditData] = useState(null);
+
     const [currentPage, setCurrentPage] = useState(1);
     const usersPerPage = 8;
-    const totalPages = Math.ceil(foods.length / usersPerPage);
+    const [totalPages, setTotalPages] = useState(1);
 
-    const displayedFoods = foods.slice(
-        (currentPage - 1) * usersPerPage,
-        currentPage * usersPerPage
-    );
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [deletingId, setDeletingId] = useState(null);
+    const [deleteLoading, setDeleteLoading] = useState(false);
 
-return (
-    <div className="mx-4 my-6">
-            <div className="flex items-center justify-between mb-3 px-2"> 
-            <h2 className="text-xl font-bold text-[#222]">DATA MAKANAN</h2> 
-            <button className="w-12 h-12 bg-[#4CAF50]/20 text-[#39833C] text-5xl leading-none rounded-full font-medium flex items-center justify-center"> {/* ⬅️ DIUBAH */}
-                <span className="relative -top-[4px]">+</span> 
-            </button> 
-        </div> 
-        <div className="rounded-2xl bg-[#f3f3f3] shadow-inner p-2">
-            <div className="grid grid-cols-8 bg-[#D7D7D7] text-[#575757] text-sm font-semibold rounded-t-2xl overflow-hidden">
-                <div className="py-3 px-3 rounded-l-xl text-center">NO</div>
-                <div className="py-3 px-3 text-center">NAMA MAKANAN</div>
-                <div className="py-3 px-3 text-center">BERAT</div>
-                <div className="py-3 px-3 text-center">KALORI</div>
-                <div className="py-3 px-3 text-center">LEMAK</div>
-                <div className="py-3 px-3 text-center">PROTEIN</div>
-                <div className="py-3 px-3 text-center">KARBO</div>
-                <div className="py-3 px-3 rounded-r-xl text-center">ACTION</div>
-            </div>
-            <div className="divide-y">
-                {displayedFoods.map((food, i) => (
-                    <div key={i} className="grid grid-cols-8 items-center bg-white text-[#222] text-sm">
-                        <div className="py-5 px-3 text-center">{(currentPage - 1) * usersPerPage + i + 1}</div>
-                        <div className="py-5 px-3 text-center">{food.nama}</div>
-                        <div className="py-5 px-3 text-center">{food.berat}</div>
-                        <div className="py-5 px-3 text-center">{food.kalori}</div>
-                        <div className="py-5 px-3 text-center">{food.lemak}</div>
-                        <div className="py-5 px-3 text-center">{food.protein}</div>
-                        <div className="py-5 px-3 text-center">{food.karbo}</div>
-                        <div className="py-5 px-3 flex gap-2 justify-center">
-                            <button className="bg-[#E8C097] text-[#6B3B0A] rounded-md px-4 py-1 font-bold text-xs">EDIT</button>
-                            <button className="bg-[#A83A3A] text-white rounded-md px-4 py-1 font-bold text-xs">HAPUS</button>
-                        </div>
-                    </div>
-                ))}
-                {Array.from({ length: usersPerPage - displayedFoods.length }).map((_, idx) => (
-                    <div key={`empty-${idx}`} className="grid grid-cols-8 bg-white text-[#222] text-sm" style={{ minHeight: '48px' }}>
-                        {Array.from({ length: 8 }).map((__, colIdx) => (
-                            <div key={colIdx} className="py-5 px-3">&nbsp;</div>
-                        ))}
-                    </div>
-                ))}
-            </div>
+    // search + debounce
+    const [searchTerm, setSearchTerm] = useState("");
+    const debouncedSearch = useDebouncedValue(searchTerm, 300);
+
+    const filteredFoods = useMemo(() => {
+        const q = (debouncedSearch || "").toLowerCase();
+        if (!q) return foods;
+        return foods.filter((f) => {
+            const name = (f.name || "").toLowerCase();
+            const weight = `${f.weight || ""}`.toLowerCase();
+            const unit = (f.weightUnit || "").toLowerCase();
+            const cal = `${f.calory ?? ""}`.toLowerCase();
+            const fat = `${f.fat ?? ""}`.toLowerCase();
+            const pro = `${f.protein ?? ""}`.toLowerCase();
+            const carb = `${f.carb ?? ""}`.toLowerCase();
+            return (
+                name.includes(q) ||
+                unit.includes(q) ||
+                weight.includes(q) ||
+                cal.includes(q) ||
+                fat.includes(q) ||
+                pro.includes(q) ||
+                carb.includes(q)
+            );
+        });
+    }, [foods, debouncedSearch]);
+
+    // FETCH DATA
+    const fetchData = async (page = 1) => {
+        setLoading(true);
+        setError("");
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                setError("Anda belum login. Silakan login ulang.");
+                setLoading(false);
+                return;
+            }
+            const response = await axios.get(FOOD_URL, {
+                params: { page, pageSize: usersPerPage, order: '[["name","asc"]]' },
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setFoods(response.data.data || []);
+            setTotalPages(Math.max(1, Math.ceil((response.data.total || 0) / usersPerPage)));
+        } catch (err) {
+            if (err.response?.status === 401) {
+                setError("Token tidak valid/expired. Silakan login ulang.");
+                localStorage.removeItem("token");
+            } else {
+                setError(err.message || "Something went wrong");
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => { fetchData(currentPage); }, [currentPage]); // eslint-disable-line
+
+    if (loading) return <div className="p-6 text-center">Loading...</div>;
+    if (error) return <div className="p-6 text-center text-red-600">{error}</div>;
+
+    const displayedFoods = filteredFoods;
+
+    return (
+        <div className="mx-4 my-6">
+            <FoodToolbar
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+                onAdd={() => { setModalOpen(true); setEditData(null); }}
+            />
+
+            <FoodTable
+                rows={displayedFoods}
+                page={currentPage}
+                perPage={usersPerPage}
+                onEdit={(food) => { setEditData(food); setModalOpen(true); }}
+                onDelete={(id) => { setDeletingId(id); setDeleteModalOpen(true); }}
+            />
+
+            <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+            />
+
+            {/* Modal Add/Edit */}
+            <BaseModal
+                show={modalOpen}
+                title={editData ? "Edit Makanan" : "Tambah Makanan"}
+                onClose={() => { setEditData(null); setModalOpen(false); }}
+            >
+                <FoodForm
+                    initialData={editData}
+                    onSubmit={(formData) => {
+                        if (editData) {
+                            // update
+                            (async () => {
+                                setLoading(true); setError("");
+                                try {
+                                    const token = localStorage.getItem("token");
+                                    if (!token) throw new Error("Anda belum login. Silakan login ulang.");
+                                    await axios.put(`${FOOD_URL}/${editData.id}`, formData, {
+                                        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                                    });
+                                    await fetchData(currentPage);
+                                    setModalOpen(false); setEditData(null);
+                                } catch (err) {
+                                    if (err.response?.status === 401) {
+                                        setError("Token tidak valid/expired. Silakan login ulang.");
+                                        localStorage.removeItem("token");
+                                    } else setError(err.message || "Gagal update data makanan");
+                                } finally { setLoading(false); }
+                            })();
+                        } else {
+                            // add
+                            (async () => {
+                                setLoading(true); setError("");
+                                try {
+                                    const token = localStorage.getItem("token");
+                                    if (!token) throw new Error("Anda belum login. Silakan login ulang.");
+                                    await axios.post(FOOD_URL, formData, {
+                                        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                                    });
+                                    await fetchData(currentPage);
+                                    setModalOpen(false);
+                                } catch (err) {
+                                    if (err.response?.status === 401) {
+                                        setError("Token tidak valid/expired. Silakan login ulang.");
+                                        localStorage.removeItem("token");
+                                    } else setError(err.message || "Gagal tambah data makanan");
+                                } finally { setLoading(false); }
+                            })();
+                        }
+                    }}
+                    onCancel={() => { setEditData(null); setModalOpen(false); }}
+                    submitLabel={editData ? "Edit" : "Add"}
+                />
+            </BaseModal>
+
+            {/* Modal Delete */}
+            <DeleteConfirmationModal
+                show={deleteModalOpen}
+                onClose={() => { setDeleteModalOpen(false); setDeletingId(null); }}
+                onDelete={async () => {
+                    setDeleteLoading(true); setError("");
+                    try {
+                        const token = localStorage.getItem("token");
+                        if (!token) throw new Error("Anda belum login. Silakan login ulang.");
+                        await axios.delete(`${FOOD_URL}/${deletingId}`, { headers: { Authorization: `Bearer ${token}` } });
+                        setDeleteModalOpen(false); setDeletingId(null);
+                        await fetchData(currentPage);
+                    } catch (err) {
+                        if (err.response?.status === 401) {
+                            setError("Token tidak valid/expired. Silakan login ulang.");
+                            localStorage.removeItem("token");
+                        } else setError(err.message || "Gagal hapus data makanan");
+                    } finally { setDeleteLoading(false); }
+                }}
+                loading={deleteLoading}
+            />
         </div>
-        <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-        />
-    </div>
-);
+    );
 }

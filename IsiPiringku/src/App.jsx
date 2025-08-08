@@ -1,6 +1,6 @@
 import React from "react";
 import "./index.css";
-import { Routes, Route, Navigate} from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 // Pages
 import HomePage from "./Pages/HomePage";
@@ -26,15 +26,12 @@ export default function App() {
 
 			<Route path="/dashboard" element={<DashboardLayouts />}>
 				<Route index element={<Navigate to="users" replace />} />
+				<Route path="artikel" element={<ArtikelSection />} />
+				<Route path="child" element={< DataAnakSection />} />
 				<Route path="users" element={<UserDataSection />} />
 				<Route path="foods" element={<FoodDataSection />} />
 				<Route path="role" element={<RoleDataSection />} />
-				   <Route path="kategori" element={<KategoriDataSection />} />
-			</Route>
-
-			<Route path="/userDetails" element={<UserDetailsDashboard />}>
-				<Route index element={<DataAnakSection />} />
-				<Route path="artikel" element={<ArtikelSection />} />
+				<Route path="kategori" element={<KategoriDataSection />} />
 			</Route>
 		</Routes>
 	);
