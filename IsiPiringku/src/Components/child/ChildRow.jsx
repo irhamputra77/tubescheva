@@ -2,7 +2,7 @@ import React from "react";
 
 export default function ChildRow({ row, indexNumber, onEdit, onDelete }) {
     return (
-        <div className="grid grid-cols-7 items-center bg-white text-[#222] text-sm">
+        <div className="grid grid-cols-10 items-center bg-white text-[#222] text-sm">
             <div className="py-5 px-1 text-center">{indexNumber}</div>
             <div className="py-5 px-2 text-center">{row.parent?.fullname || "-"}</div>
             <div className="py-5 px-2 text-center">{row.fullname}</div>
@@ -12,6 +12,9 @@ export default function ChildRow({ row, indexNumber, onEdit, onDelete }) {
             <div className="py-5 px-2 text-center">
                 {row.gender === "m" ? "LAKI-LAKI" : row.gender === "f" ? "PEREMPUAN" : "-"}
             </div>
+            <div className="py-5 px-2 text-center">{row.weight || "-"}</div>
+            <div className="py-5 px-2 text-center">{row.height || "-"}</div>
+            <div className="py-5 px-2 text-center">{row.headCircumference || "-"}</div>
             <div className="py-5 px-2 text-center">{row.birthCondition || "-"}</div>
             <div className="py-5 px-2 flex gap-2 justify-center">
                 <button

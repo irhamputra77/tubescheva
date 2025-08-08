@@ -3,12 +3,15 @@ import ChildRow from "./ChildRow";
 
 function TableHeader() {
     return (
-        <div className="grid grid-cols-7 bg-[#D7D7D7] text-[#575757] text-sm font-semibold rounded-t-2xl overflow-hidden">
+        <div className="grid grid-cols-10 bg-[#D7D7D7] text-[#575757] text-sm font-semibold rounded-t-2xl overflow-hidden">
             <div className="text-center py-3 px-1 rounded-l-xl">NO</div>
             <div className="text-center py-3 px-2">USER</div>
             <div className="text-center py-3 px-2">NAMA LENGKAP</div>
             <div className="text-center py-3 px-2">TANGGAL LAHIR</div>
             <div className="text-center py-3 px-2">GENDER</div>
+            <div className="text-center py-3 px-2">BERAT</div>
+            <div className="text-center py-3 px-2">TINGGI</div>
+            <div className="text-center py-3 px-2">LINGKAR KEPALA</div>
             <div className="text-center py-3 px-2">KONDISI KELAHIRAN</div>
             <div className="text-center py-3 px-2 rounded-r-xl">ACTION</div>
         </div>
